@@ -105,3 +105,29 @@ export const oauthRefreshTokensTable = pgTable(
     refreshTokensExpiresAtIdx: index("oauth_refresh_tokens_expires_at_idx").on(table.expiresAt),
   }),
 );
+
+export const webSessionsTable = pgTable(
+  "web_sessions",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    sessionId: varchar("session_id", { length: 255 }).notNull(),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => usersTable.id, { onDelete: "cascade" }),
+    clientId: varchar("client_id", { length: 255 }).notNull(),
+    csrfNonce: text("csrf_nonce").notNull(),
+    accessToken: text("access_token").notNull(),
+    refreshToken: text("refresh_token").notNull(),
+    idToken: text("id_token"),
+    scope: text("scope").notNull(),
+    accessTokenExpiresAt: timestamp("access_token_expires_at").notNull(),
+    expiresAt: timestamp("expires_at").notNull(),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at").defaultNow().$onUpdate(() => new Date()),
+  },
+  (table) => ({
+    webSessionsSessionIdUniqueIdx: uniqueIndex("web_sessions_session_id_unique_idx").on(table.sessionId),
+    webSessionsUserIdIdx: index("web_sessions_user_id_idx").on(table.userId),
+    webSessionsExpiresAtIdx: index("web_sessions_expires_at_idx").on(table.expiresAt),
+  }),
+);

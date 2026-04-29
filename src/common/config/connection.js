@@ -25,6 +25,14 @@ export const config = {
   accessTokenTtlSeconds: Number(process.env.ACCESS_TOKEN_TTL_SECONDS) || 3600,
   refreshTokenTtlSeconds: Number(process.env.REFRESH_TOKEN_TTL_SECONDS) || 60 * 60 * 24 * 30,
   authorizationCodeTtlSeconds: Number(process.env.AUTHORIZATION_CODE_TTL_SECONDS) || 300,
+  webSessionTtlSeconds: Number(process.env.WEB_SESSION_TTL_SECONDS) || 60 * 60 * 24 * 7,
+  webFlowCookieTtlSeconds: Number(process.env.WEB_FLOW_COOKIE_TTL_SECONDS) || 600,
+  webSessionCookieName: process.env.WEB_SESSION_COOKIE_NAME || "oidc_web_session",
+  webFlowCookieName: process.env.WEB_FLOW_COOKIE_NAME || "oidc_web_flow",
+  webClientId: process.env.WEB_BFF_CLIENT_ID || "oidc-web-client",
+  webClientScope: process.env.WEB_BFF_SCOPE || "openid profile email offline_access",
+  webClientRedirectUri:
+    process.env.WEB_BFF_REDIRECT_URI || `${issuer}/web/login/callback`,
   imageKit: {
     publicKey: process.env.IMAGEKIT_PUBLIC_KEY || "",
     privateKey: process.env.IMAGEKIT_PRIVATE_KEY || "",
@@ -44,6 +52,7 @@ export const config = {
 
 if (config.clients.web.redirectUris.length === 0) {
   config.clients.web.redirectUris = unique([
+    `${issuer}/web/login/callback`,
     `${issuer}/callback.html`,
     `http://localhost:${config.port}/callback.html`,
   ]);

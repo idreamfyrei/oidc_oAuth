@@ -67,11 +67,13 @@ export const oauthClientsTable = pgTable(
     id: uuid("id").primaryKey().defaultRandom(),
     clientId: varchar("client_id", { length: 255 }).notNull(),
     clientName: varchar("client_name", { length: 255 }).notNull(),
+    appUrl: text("app_url"),
     redirectUris: text("redirect_uris").notNull(),
     applicationType: varchar("application_type", { length: 30 }).notNull(),
     tokenEndpointAuthMethod: varchar("token_endpoint_auth_method", { length: 30 })
       .default("none")
       .notNull(),
+    ownerUserId: uuid("owner_user_id").references(() => usersTable.id, { onDelete: "set null" }),
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at").defaultNow().$onUpdate(() => new Date()),
   },
@@ -79,6 +81,7 @@ export const oauthClientsTable = pgTable(
     oauthClientsClientIdUniqueIdx: uniqueIndex("oauth_clients_client_id_unique_idx").on(
       table.clientId,
     ),
+    oauthClientsOwnerUserIdIdx: index("oauth_clients_owner_user_id_idx").on(table.ownerUserId),
   }),
 );
 

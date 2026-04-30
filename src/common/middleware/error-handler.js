@@ -34,7 +34,12 @@ const errorHandler = (error, req, res, next) => {
     return;
   }
 
-  console.error(error);
+  console.error({
+    message: error?.message,
+    stack: error?.stack,
+    method: req.method,
+    path: req.originalUrl,
+  });
 
   res.status(500).json({
     success: false,

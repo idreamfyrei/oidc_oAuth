@@ -8,6 +8,7 @@
     "db:migrate": "drizzle-kit migrate",
     "db:generate": "drizzle-kit generate",
     "db:studio": "drizzle-kit studio",
+    "check:production": "node scripts/check-production.js",
     "start": "node index.js",
     "dev": "node --watch index.js"
   },

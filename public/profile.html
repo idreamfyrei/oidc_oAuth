@@ -17,7 +17,7 @@
 
           <nav class="topnav" aria-label="Primary">
             <a class="nav-link" href="/">Home</a>
-            <a class="nav-link active" href="/profile.html">Profile</a>
+            <a class="nav-link active" href="/dashboard">Profile</a>
             <a class="nav-link" href="/client-register.html">Register app</a>
             <button class="nav-button" id="logoutNav" type="button">Logout</button>
           </nav>
@@ -216,7 +216,7 @@
           setAvatar(claims);
           renderApps(appsResponse.data || []);
         } catch {
-          window.location.href = "/web/login";
+          window.location.href = "/dashboard";
         }
       };
 

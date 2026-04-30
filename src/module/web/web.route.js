@@ -4,6 +4,7 @@ import {
   getWebProfile,
   handleWebLoginCallback,
   logoutWebSession,
+  openDashboard,
   refreshWebSession,
   startWebLoginPage,
   startWebLogin,
@@ -17,6 +18,7 @@ webRouter.get("/web/login/start", startWebLogin);
 webRouter.get("/web/login", startWebLoginPage);
 webRouter.get("/web/signup", startWebSignupPage);
 webRouter.get("/web/login/callback", handleWebLoginCallback);
+webRouter.get("/dashboard", openDashboard);
 webRouter.get("/web/me", requireWebSession, getWebProfile);
 webRouter.get("/web/apps", requireWebSession, getWebApps);
 webRouter.post("/web/refresh", requireWebSession, refreshWebSession);

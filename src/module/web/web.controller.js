@@ -10,6 +10,7 @@ import {
   deleteWebSession,
   getWebOwnedApps,
   getWebMe,
+  getWebSessionFromRequest,
   refreshWebSessionTokens,
 } from "./web.service.js";
 
@@ -40,6 +41,15 @@ export const startWebSignupPage = async (req, res, next) => {
     return res.redirect(302, redirectUrl);
   } catch (error) {
     next(error);
+  }
+};
+
+export const openDashboard = async (req, res) => {
+  try {
+    await getWebSessionFromRequest(req);
+    return res.redirect(302, "/profile.html");
+  } catch {
+    return res.redirect(302, "/web/login");
   }
 };
 

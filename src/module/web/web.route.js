@@ -14,14 +14,15 @@ import { requireWebSession } from "./web.middleware.js";
 
 const webRouter = Router();
 
-webRouter.get("/web/login/start", startWebLogin);
-webRouter.get("/web/login", startWebLoginPage);
-webRouter.get("/web/signup", startWebSignupPage);
-webRouter.get("/web/login/callback", handleWebLoginCallback);
+webRouter.get("/login/start", startWebLogin);
+webRouter.get("/login", startWebLoginPage);
+webRouter.get("/signin", startWebLoginPage);
+webRouter.get("/signup", startWebSignupPage);
+webRouter.get("/login/callback", handleWebLoginCallback);
 webRouter.get("/dashboard", openDashboard);
-webRouter.get("/web/me", requireWebSession, getWebProfile);
-webRouter.get("/web/apps", requireWebSession, getWebApps);
-webRouter.post("/web/refresh", requireWebSession, refreshWebSession);
-webRouter.post("/web/logout", requireWebSession, logoutWebSession);
+webRouter.get("/me", requireWebSession, getWebProfile);
+webRouter.get("/apps", requireWebSession, getWebApps);
+webRouter.post("/refresh", requireWebSession, refreshWebSession);
+webRouter.post("/logout", requireWebSession, logoutWebSession);
 
 export default webRouter;

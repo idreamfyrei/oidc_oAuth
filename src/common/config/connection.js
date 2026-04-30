@@ -57,7 +57,7 @@ export const config = {
   webClientId: process.env.WEB_BFF_CLIENT_ID || "oidc-web-client",
   webClientScope: process.env.WEB_BFF_SCOPE || "openid profile email offline_access",
   webClientRedirectUri:
-    process.env.WEB_BFF_REDIRECT_URI || `${issuer}/web/login/callback`,
+    process.env.WEB_BFF_REDIRECT_URI || `${issuer}/login/callback`,
   imageKit: {
     publicKey: process.env.IMAGEKIT_PUBLIC_KEY || "",
     privateKey: process.env.IMAGEKIT_PRIVATE_KEY || "",
@@ -77,7 +77,7 @@ export const config = {
 
 if (config.clients.web.redirectUris.length === 0) {
   config.clients.web.redirectUris = unique([
-    `${issuer}/web/login/callback`,
+    `${issuer}/login/callback`,
     `${issuer}/callback.html`,
     `http://localhost:${config.port}/callback.html`,
   ]);

@@ -1,57 +1,37 @@
-# OIDC Identity Provider (IdP) - POC Spec Sheet
+# OIDC Identity Provider (IdP) - Learning Project
 
-> **A from-scratch implementation of an OpenID Connect Identity Provider, built to understand how auth systems actually work under the hood.**
+A from-scratch OpenID Connect provider that demonstrates how OAuth 2.0 Authorization Code Flow, PKCE, nonce handling, discovery, JWKS, and token issuance work on the server side.
 
-This is a learning-first project. The goal is not to build a production-ready auth service. The goal is to implement the important parts of the OIDC Authorization Code Flow manually so things like discovery, PKCE verification, JWT signing, refresh tokens, and userinfo stop feeling like black boxes.
+## Table Of Contents
 
-If you have mostly interacted with OIDC from the client side by using Google, GitHub, or another hosted IdP, this project helps flip that mental model and show what the provider side has to do.
+- [Introduction](#introduction)
+- [Tech Stack](#tech-stack)
+- [Project Structure](#project-structure)
+- [Project Setup / Getting Started](#project-setup--getting-started)
+- [OAuth 2.0 vs OIDC](#oauth-20-vs-oidc)
+- [Nonce and PKCE Explained](#nonce-and-pkce-explained)
+- [OIDC Authorization Code Flow](#oidc-authorization-code-flow)
+- [BFF Demo Flow](#bff-demo-flow)
+- [Discovery Endpoint](#discovery-endpoint)
+- [Token Shapes](#token-shapes)
+- [API Endpoints and Their Use](#api-endpoints-and-their-use)
+- [Educational Limits Of This Project](#educational-limits-of-this-project)
+- [Future Improvements](#future-improvements)
+- [References](#references)
 
----
+## Introduction
 
-## What We're Building
+This repository is built for education and experimentation. It helps you understand identity flows by implementing core OIDC provider responsibilities directly in Node.js.
 
-Two demo-facing pieces live in this repo:
+What this project demonstrates:
+- OIDC Authorization Code Flow with PKCE (`S256`)
+- OIDC discovery and JWKS publication
+- Access token, ID token, and refresh token issuance
+- Userinfo endpoint behavior
+- Public client registration and token exchange
+- A browser-friendly BFF flow under normal app routes (`/login`, `/me`, `/logout`, etc.)
 
-**1. The IdP Service**  
-The identity provider. It handles user registration, sign-in, client registration, authorization, token issuance, JWKS exposure, and userinfo responses.
-
-**2. A Demo Client Experience**  
-A small frontend served from `public/` that demonstrates both:
-
-- the classic authorization code redirect flow
-- a Backend-for-Frontend (BFF) style web login flow under `/web/*`
-
-This makes the repo useful both for learning the protocol and for seeing what a browser-facing integration looks like.
-
----
-
-## Educational Purpose
-
-This repository is a proof of concept for education, experimentation, and demos.
-
-- Built to understand OIDC and OAuth 2.0 internals
-- Good for local testing and protocol walkthroughs
-- Not presented as production-ready authentication infrastructure
-- Security hardening, monitoring, audit controls, and operational safeguards are intentionally incomplete
-
----
-
-## Concepts Implemented
-
-- OpenID Connect Authorization Code Flow
-- PKCE with `S256`
-- RS256 JWT signing with an asymmetric key pair
-- JWKS endpoint for public key discovery
-- OpenID Connect Discovery document
-- Access tokens
-- ID tokens
-- Refresh tokens with rotation-like replacement behavior
-- Userinfo endpoint
-- OAuth client registration
-- Consent page before completing login
-- Web session handling for a BFF-style demo flow
-
----
+This is not production authentication infrastructure. It is a practical learning sandbox.
 
 ## Tech Stack
 
@@ -63,268 +43,129 @@ This repository is a proof of concept for education, experimentation, and demos.
 | ORM | Drizzle ORM |
 | Database | PostgreSQL |
 | JWT signing | `jsonwebtoken` |
-| JWK / JWKS conversion | `node-jose` |
+| JWK / JWKS | `node-jose` |
 | Password hashing | `bcrypt` |
 | Validation | Zod |
-| File uploads | Multer |
+| Uploads | Multer |
 | Image hosting | ImageKit |
 
----
-
-## OIDC Flow - Full Picture
+## Project Structure
 
 ```text
-User starts login from a client app
-          |
-          v
-Client redirects user to /oauth/authorize
-with: client_id, redirect_uri, scope, state,
-      nonce, code_challenge, code_challenge_method
-          |
-          v
-IdP validates client_id, redirect_uri, response_type,
-PKCE fields, and nonce rules
-          |
-          v
-IdP redirects to consent/login UI
-          |
-          v
-User signs in or creates an account
-          |
-          v
-IdP creates an authorization code
-stores: code, user_id, client_id, redirect_uri,
-        scope, nonce, code_challenge, expires_at
-          |
-          v
-IdP redirects back to the client redirect_uri
-with: ?code=AUTH_CODE&state=STATE
-          |
-          v
-Client backend calls /oauth/token
-with: code, client_id, redirect_uri, code_verifier,
-      grant_type=authorization_code
-          |
-          v
-IdP verifies:
-- code exists
-- code is not expired
-- client_id matches
-- redirect_uri matches
-- PKCE verifier matches stored challenge
-          |
-          v
-IdP consumes the auth code
-issues: access_token + refresh_token + id_token
-          |
-          v
-Client can call /oauth/userinfo using the access token
-or maintain its own application session
+src/
+  app.js                    # Express app wiring
+  common/
+    config/                 # Environment and config handling
+    db/                     # Drizzle schema and DB access
+    middleware/             # Shared middleware
+    utils/                  # Shared helper utilities
+  module/
+    oauth/                  # OIDC/OAuth endpoints, services, middleware
+    web/                    # BFF login/session flow
+    client/                 # OAuth client registration/read APIs
+    account/                # User account registration
+    auth/                   # User sign-in
+public/                     # Demo HTML pages
+drizzle/                    # Migration artifacts
+index.js                    # Server entrypoint
+README.md
 ```
 
----
-
-## BFF Demo Flow
-
-The repo also contains a simple server-managed web login flow:
-
-```text
-Browser visits /
-     |
-     v
-GET /web/login/start
-     |
-     v
-Server creates PKCE + state + nonce
-stores them in an HttpOnly flow cookie
-     |
-     v
-Redirect to /oauth/authorize
-     |
-     v
-User signs in through the IdP UI
-     |
-     v
-Redirect lands on /web/login/callback
-     |
-     v
-Server exchanges code for tokens
-creates web session row in PostgreSQL
-sets HttpOnly session cookie
-     |
-     v
-Browser calls /web/me, /web/refresh, /web/logout
-without holding raw OAuth tokens in JS
-```
-
-This is useful for understanding how a browser app can avoid storing tokens directly in frontend JavaScript.
-
----
-
-## Database Schema
-
-The actual schema is implemented with Drizzle in [src/common/db/db.js](/Users/saumya/Documents/GitHub/oidc/src/common/db/db.js). Below is the conceptual shape.
-
-### `users`
-
-```js
-{
-  id: uuid,
-  firstName: string,
-  lastName: string,
-  profileImageURL: string | null,
-  email: string,
-  emailVerified: boolean,
-  password: string | null,
-  salt: string | null,
-  createdAt: timestamp,
-  updatedAt: timestamp
-}
-```
-
-Stores local IdP accounts used for sign-in and for building OIDC claims like `sub`, `name`, and `email`.
-
-### `oauth_clients`
-
-```js
-{
-  id: uuid,
-  clientId: string,
-  clientName: string,
-  redirectUris: string,
-  applicationType: string,
-  tokenEndpointAuthMethod: string,
-  createdAt: timestamp,
-  updatedAt: timestamp
-}
-```
-
-Represents registered OAuth clients. In the current POC, the token endpoint auth method is intentionally simple and defaults to `none`, which means public-client style exchanges are the main learning path.
-
-### `oauth_authorization_codes`
-
-```js
-{
-  id: uuid,
-  code: string,
-  userId: uuid,
-  clientId: string,
-  redirectUri: string,
-  scope: string,
-  nonce: string | null,
-  codeChallenge: string,
-  codeChallengeMethod: string,
-  expiresAt: timestamp,
-  createdAt: timestamp
-}
-```
-
-Stores short-lived authorization codes and the PKCE challenge data required during token exchange.
-
-**Current implementation note:**  
-Authorization codes are deleted when consumed. That keeps the implementation simple, but it does remove the audit trail. A future improvement would be to keep the row and mark it with `usedAt`.
-
-### `oauth_refresh_tokens`
-
-```js
-{
-  id: uuid,
-  token: string,
-  userId: uuid,
-  clientId: string,
-  scope: string,
-  nonce: string | null,
-  expiresAt: timestamp,
-  createdAt: timestamp,
-  rotatedFromTokenId: uuid | null
-}
-```
-
-Refresh tokens are persisted so the server can issue new access tokens without forcing the user to log in again.
-
-### `web_sessions`
-
-```js
-{
-  id: uuid,
-  sessionId: string,
-  userId: uuid,
-  clientId: string,
-  csrfNonce: string,
-  accessToken: string,
-  refreshToken: string,
-  idToken: string | null,
-  scope: string,
-  accessTokenExpiresAt: timestamp,
-  expiresAt: timestamp,
-  createdAt: timestamp,
-  updatedAt: timestamp
-}
-```
-
-Supports the BFF demo flow by storing server-side session state and sending only an HttpOnly cookie to the browser.
-
----
-
-## RS256 Key Pair
-
-This IdP signs tokens with RS256 using a private/public key pair.
-
-- The server signs JWTs with the private key
-- Clients verify JWTs with the public key exposed via JWKS
-- Verifiers do not need access to the signing key
-
-Generate keys locally:
+## Project Setup / Getting Started
 
 ```bash
-mkdir -p cert
-openssl genpkey -algorithm RSA -pkeyopt rsa_keygen_bits:2048 -out cert/private-key.pem
-openssl rsa -in cert/private-key.pem -pubout -out cert/public-key.pub
+pnpm install
+./key-gen.sh
+cp .env.example .env
+pnpm db:generate
+pnpm db:migrate
+pnpm dev
 ```
 
-Set `KEY_ID` in your environment and keep the same key pair across restarts. If you regenerate keys, old tokens will no longer verify.
+Default local URL:
 
----
+```text
+http://localhost:3000
+```
 
-## API Endpoints
+Use `.env.example` as the environment variable reference.
 
-### Discovery
+## OAuth 2.0 vs OIDC
+
+- **OAuth 2.0** is for authorization: "Can this app access this resource?"
+- **OIDC** adds authentication identity on top of OAuth 2.0: "Who is the user?"
+
+In practice:
+- OAuth gives you an `access_token` to call APIs.
+- OIDC adds an `id_token` with identity claims (`sub`, `email`, etc.) and standard discovery metadata.
+
+## Nonce and PKCE Explained
+
+### Nonce (OIDC replay protection for ID tokens)
+
+`nonce` is generated by the client and sent in `/oauth/authorize`. The provider stores it with the authorization code and later includes it in the issued ID token.
+
+Why it matters:
+- Prevents replay/substitution of ID tokens
+- Lets the client verify the ID token belongs to the original auth request
+
+### PKCE (OAuth code interception protection)
+
+PKCE uses a one-time verifier/challenge pair:
+1. Client creates a random `code_verifier`
+2. Client sends `code_challenge = BASE64URL(SHA256(code_verifier))` in `/oauth/authorize`
+3. Provider stores `code_challenge`
+4. Client sends original `code_verifier` to `/oauth/token`
+5. Provider recalculates and compares
+
+If they do not match, token exchange fails (`invalid_grant`).
+
+## OIDC Authorization Code Flow
+
+```mermaid
+sequenceDiagram
+    participant U as User
+    participant C as Client App
+    participant P as OIDC Provider (this project)
+
+    U->>C: Click "Sign in"
+    C->>P: GET /oauth/authorize\n(client_id, redirect_uri, scope, state, nonce,\ncode_challenge, code_challenge_method=S256)
+    P->>U: Show login/consent UI
+    U->>P: Authenticate and approve
+    P->>C: Redirect with ?code=...&state=...
+    C->>P: POST /oauth/token\n(grant_type=authorization_code, code,\nredirect_uri, client_id, code_verifier)
+    P->>P: Validate code + PKCE + redirect_uri/client_id
+    P->>C: access_token + id_token + refresh_token
+    C->>P: GET /oauth/userinfo (Bearer access_token)
+    P->>C: User claims
+```
+
+In words:
+- The browser is redirected to `/oauth/authorize` with `state`, `nonce`, and PKCE values.
+- After login/consent, the provider returns a short-lived authorization code.
+- The client backend exchanges the code at `/oauth/token` using the PKCE verifier.
+- The provider issues tokens and the client can call `/oauth/userinfo`.
+
+## Backend For Frontend Demo Flow
+
+
+
+In words:
+- Tokens stay server-side, not in browser JavaScript.
+- Browser receives only a session cookie.
+- This mirrors common production BFF patterns at a simplified level.
+
+## Discovery Endpoint
+
+The OIDC discovery metadata is available at:
 
 - `GET /.well-known/openid-configuration`
+
+JWKS is available at:
+
 - `GET /.well-known/jwks.json`
 
-### OAuth
-
-- `GET /oauth/authorize`
-- `POST /oauth/token`
-- `GET /oauth/userinfo`
-
-### Accounts and Auth
-
-- `POST /accounts/register`
-- `POST /auth/sign-in`
-
-### Clients
-
-- `GET /clients`
-- `GET /clients/:clientId`
-- `POST /clients/register`
-
-### Web BFF Demo
-
-- `GET /web/login/start`
-- `GET /web/login/callback`
-- `GET /web/me`
-- `POST /web/refresh`
-- `POST /web/logout`
-
----
-
-## Discovery Document
-
-The discovery document is exposed at `/.well-known/openid-configuration`.
-
-It currently advertises:
+Current discovery shape:
 
 ```json
 {
@@ -343,11 +184,11 @@ It currently advertises:
 }
 ```
 
----
-
 ## Token Shapes
 
-### Access Token
+### Access Token (JWT)
+
+Used to call protected resource endpoints such as `/oauth/userinfo`.
 
 ```json
 {
@@ -361,7 +202,9 @@ It currently advertises:
 }
 ```
 
-### ID Token
+### ID Token (JWT)
+
+Used by clients to authenticate the user and validate claims, including `nonce`.
 
 ```json
 {
@@ -383,7 +226,9 @@ It currently advertises:
 }
 ```
 
-### Refresh Token
+### Refresh Token (Opaque string)
+
+Used to request new access/ID tokens without re-authenticating.
 
 ```json
 {
@@ -391,182 +236,57 @@ It currently advertises:
 }
 ```
 
----
+## API Endpoints and Their Use
 
-## PKCE Verification Logic
+### Discovery
+- `GET /.well-known/openid-configuration` - Provider metadata for OIDC clients.
+- `GET /.well-known/jwks.json` - Public signing keys for JWT verification.
 
-```text
-During /oauth/authorize:
-- client sends code_challenge
-- server stores code_challenge with the auth code
+### OAuth/OIDC
+- `GET /oauth/authorize` - Starts Authorization Code flow.
+- `POST /oauth/token` - Exchanges code or refresh token for new tokens.
+- `GET /oauth/userinfo` - Returns user claims for a valid access token.
 
-During /oauth/token:
-- client sends original code_verifier
-- server computes base64url(sha256(code_verifier))
-- server compares computed value with stored code_challenge
-- mismatch => invalid_grant
-```
+### User Account and Auth
+- `POST /accounts/register` - Creates a local user account.
+- `POST /auth/sign-in` - Signs in user credentials for the auth UI flow.
 
-This prevents an intercepted authorization code from being redeemed without the original verifier.
+### Client Management
+- `GET /clients` - Lists registered clients.
+- `GET /clients/:clientId` - Returns one client's public details.
+- `POST /clients/register` - Registers a new OAuth client.
 
----
+### Web/BFF Demo
+- `GET /login/start` - Creates flow state and redirects to authorization.
+- `GET /login` - Login page for web demo.
+- `GET /signin` - Alias for `/login`.
+- `GET /signup` - Signup page for web demo.
+- `GET /login/callback` - Handles auth callback and token exchange.
+- `GET /dashboard` - Demo dashboard.
+- `GET /me` - Returns current web session profile.
+- `GET /apps` - Returns apps for current session.
+- `POST /refresh` - Refreshes session token set.
+- `POST /logout` - Ends web session.
 
-## State Parameter
+## Educational Limits Of This Project
 
-The current implementation treats `state` as client-managed CSRF protection.
-
-- The IdP receives it
-- The IdP echoes it back during redirect
-- The client is responsible for storing and validating it
-
-In the BFF flow, the server also maintains a login flow cookie containing the generated state and nonce so the callback can be matched safely.
-
----
-
-## Project Structure
-
-```text
-src/
-  common/
-    config/
-    db/
-    middleware/
-    utils/
-  module/
-    account/
-    auth/
-    client/
-    oauth/
-    web/
-public/
-  index.html
-  consent.html
-  authenticate.html
-  signup.html
-  callback.html
-  client-register.html
-drizzle/
-index.js
-README.md
-```
-
----
-
-## Getting Started
-
-```bash
-pnpm install
-./key-gen.sh
-cp .env.example .env
-pnpm db:generate
-pnpm db:migrate
-pnpm dev
-```
-
-By default, the app runs on:
-
-```text
-http://localhost:3000
-```
-
-Use [.env.example](/Users/saumya/Documents/GitHub/oidc/.env.example) as the configuration reference.
-
-## Deploying To Railway
-
-1. Create a new Railway project from this GitHub repository.
-2. Add a Railway PostgreSQL service, then copy its `DATABASE_URL` into the app service variables.
-3. Set the app variables:
-
-```text
-NODE_ENV=production
-ISSUER=https://your-railway-app.up.railway.app
-WEB_BFF_REDIRECT_URI=https://your-railway-app.up.railway.app/web/login/callback
-DATABASE_URL=postgresql://...
-KEY_ID=key-1
-PRIVATE_KEY=-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----
-PUBLIC_KEY=-----BEGIN PUBLIC KEY-----\n...\n-----END PUBLIC KEY-----
-```
-
-Use Railway's public app domain for `ISSUER` and `WEB_BFF_REDIRECT_URI`. Do not use a `*.railway.internal` hostname; that hostname is only reachable from other Railway services and will fail in a user's browser with `DNS_PROBE_FINISHED_NXDOMAIN`.
-
-4. Generate the RSA keys locally with `./key-gen.sh`, then paste the private and public PEM values into Railway as `PRIVATE_KEY` and `PUBLIC_KEY`. Keep the same keys across deploys so existing tokens continue to verify.
-5. Set Railway's start command to `pnpm start` if it does not detect it automatically.
-6. Run database migrations against the Railway database:
-
-```bash
-pnpm db:migrate
-```
-
-7. After the first deploy, test:
-
-```text
-https://your-railway-app.up.railway.app/.well-known/openid-configuration
-https://your-railway-app.up.railway.app/.well-known/jwks.json
-```
-
-For any external client app, register the exact production callback URL in `/client-register.html` or configure the matching client redirect URI before starting the login flow.
-
----
-
-## Current State Of The Codebase
-
-The codebase is fairly clean for a POC:
-
-- routes, controllers, services, schemas, and shared utilities are separated clearly
-- OIDC concerns are grouped under `src/module/oauth`
-- the BFF demo flow is isolated under `src/module/web`
-- request validation and token logic are not mixed directly into route files
-
-That said, I would not call it fully refactored yet. There are still some simplifications that are acceptable for a learning project but worth improving:
-
-- authorization codes are deleted on use instead of being retained with a `usedAt` timestamp
-- token endpoint auth is currently public-client oriented with `token_endpoint_auth_methods_supported: ["none"]`
-- refresh token lifecycle is simple and would benefit from explicit reuse detection and revocation metadata
-- cookie parsing and serialization are handwritten rather than delegated to hardened middleware/utilities
-- some naming and README language historically mixed the classic redirect flow and the BFF flow, which can confuse readers
-
----
+This project is intentionally scoped for learning, not production.   I have made an effort to read the documentation and implement this, the tough part for me was to figure out to keep everything at backend and have no token transaction on frontend. This project was a way to gain understaning of the provider end of IdP. 
 
 ## Future Improvements
 
-- Add `usedAt`, `revokedAt`, and audit metadata for authorization codes instead of deleting consumed rows
-- Add confidential client support with `client_secret` storage and verification
-- Hash refresh tokens at rest instead of storing raw token values
-- Implement refresh token reuse detection and family invalidation
-- Add explicit logout and revocation semantics for OAuth clients, not just web sessions
-- Add stronger session CSRF protection patterns for browser-driven state changes
-- Move cookie parsing to a dedicated library and centralize cookie policy configuration
-- Add rate limiting for login, signup, token exchange, and client registration endpoints
-- Add structured request logging and security event logging
-- Add automated tests for authorize, token, refresh, userinfo, and BFF session flows
-- Add cleanup jobs for expired auth codes, refresh tokens, and web sessions
-- Add stricter scope validation and per-client allowed scope configuration
-- Add issuer, cookie, and proxy hardening guidance for real deployments
-- Add key rotation support with multiple active JWKs
-- Add account recovery, email verification, and stronger user lifecycle controls
-- Add API documentation examples for each endpoint and common failure response
-- Add Docker-based local setup for faster onboarding
-
----
-
-## What This Is Not
-
-This is a proof of concept for learning. It is not:
-
-- Production ready
-- Security audited
-- Multi-tenant hardened
-- Compliance ready
-
----
+- Add confidential client auth (`client_secret_*`) support
+- Hash refresh tokens at rest and implement token family/reuse detection
+- Preserve authorization code audit data (`usedAt`, `revokedAt`, IP/device metadata)
+- Add endpoint rate limiting and stronger brute-force protection
+- Add structured security logging and observability dashboards
+- Add key rotation with multiple active JWKs and overlap windows
+- Add stronger session CSRF protections and centralized cookie policy
 
 ## References
 
 - [OpenID Connect Core 1.0](https://openid.net/specs/openid-connect-core-1_0.html)
+- [OpenID Connect Discovery 1.0](https://openid.net/specs/openid-connect-discovery-1_0.html)
 - [OAuth 2.0 RFC 6749](https://datatracker.ietf.org/doc/html/rfc6749)
 - [PKCE RFC 7636](https://datatracker.ietf.org/doc/html/rfc7636)
-- [OpenID Connect Discovery 1.0](https://openid.net/specs/openid-connect-discovery-1_0.html)
 - [JWT RFC 7519](https://datatracker.ietf.org/doc/html/rfc7519)
 - [JWK RFC 7517](https://datatracker.ietf.org/doc/html/rfc7517)
-- [node-jose](https://github.com/cisco/node-jose)
-- [jsonwebtoken](https://github.com/auth0/node-jsonwebtoken)

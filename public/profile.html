@@ -199,8 +199,8 @@
       const loadProfile = async () => {
         try {
           const [meResponse, appsResponse] = await Promise.all([
-            apiGet("/web/me"),
-            apiGet("/web/apps"),
+            apiGet("/me"),
+            apiGet("/apps"),
           ]);
           const claims = meResponse.data || {};
           nodes.sessionEmail.textContent = claims.email || "Signed in";
@@ -222,7 +222,7 @@
 
       const logout = async () => {
         try {
-          await apiPost("/web/logout");
+          await apiPost("/logout");
         } catch {
           // Best effort logout.
         } finally {

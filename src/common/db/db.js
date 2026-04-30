@@ -69,6 +69,7 @@ export const oauthClientsTable = pgTable(
     clientName: varchar("client_name", { length: 255 }).notNull(),
     appUrl: text("app_url"),
     redirectUris: text("redirect_uris").notNull(),
+    backchannelLogoutUri: text("backchannel_logout_uri"),
     applicationType: varchar("application_type", { length: 30 }).notNull(),
     tokenEndpointAuthMethod: varchar("token_endpoint_auth_method", { length: 30 })
       .default("none")

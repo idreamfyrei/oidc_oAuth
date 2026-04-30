@@ -1,4 +1,6 @@
 import ApiResponse from "../../common/utils/api-response.js";
+import { notifyBackchannelLogout } from "../oauth/backchannel-logout.service.js";
+import { getClientByClientId } from "../client/client.service.js";
 import {
   buildFlowCookieHeader,
   buildWebAuthPageStartResult,
@@ -7,10 +9,10 @@ import {
   clearFlowCookieHeader,
   clearSessionCookieHeader,
   completeWebLoginCallback,
-  deleteWebSession,
   getWebOwnedApps,
   getWebMe,
   getWebSessionFromRequest,
+  logoutClientForUser,
   refreshWebSessionTokens,
 } from "./web.service.js";
 
@@ -97,9 +99,17 @@ export const getWebApps = async (req, res, next) => {
 
 export const logoutWebSession = async (req, res, next) => {
   try {
-    await deleteWebSession(req.webSession);
+    const client = await getClientByClientId(req.webSession.clientId);
+    const backchannel = await notifyBackchannelLogout({
+      client,
+      userId: req.webSession.userId,
+    });
+    const result = await logoutClientForUser(req.webSession);
     res.setHeader("Set-Cookie", clearSessionCookieHeader());
-    return ApiResponse.ok(res, "Logged out.");
+    return ApiResponse.ok(res, "Logged out from this client.", {
+      ...result,
+      backchannel,
+    });
   } catch (error) {
     next(error);
   }

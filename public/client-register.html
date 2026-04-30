@@ -52,6 +52,19 @@
             </div>
 
             <div class="field">
+              <label for="backchannelLogoutUri">Back-channel logout URI (optional)</label>
+              <input
+                class="input"
+                id="backchannelLogoutUri"
+                type="url"
+                placeholder="https://myapp.com/oidc/backchannel-logout"
+              />
+              <p class="helper">
+                Server endpoint that receives logout tokens from the IdP.
+              </p>
+            </div>
+
+            <div class="field">
               <label for="clientId">Client ID override (optional)</label>
               <input
                 class="input"
@@ -196,6 +209,7 @@
           applicationType: "web",
           tokenEndpointAuthMethod: "none",
           redirectUris: [document.getElementById("redirectUri").value.trim()],
+          backchannelLogoutUri: document.getElementById("backchannelLogoutUri").value.trim(),
         };
 
         try {

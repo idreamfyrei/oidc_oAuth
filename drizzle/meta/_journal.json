@@ -29,6 +29,13 @@
       "when": 1777533208745,
       "tag": "0003_repair_users_profile_image_url",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1777540800000,
+      "tag": "0004_add_backchannel_logout_uri",
+      "breakpoints": true
     }
   ]
 }

@@ -11,6 +11,7 @@ export const registerClientSchema = z.object({
   clientName: z.string().trim().min(2).max(255),
   websiteUrl: z.union([z.string().trim().url(), z.literal("")]).optional(),
   redirectUris: z.array(z.string().trim().url()).min(1),
+  backchannelLogoutUri: z.union([z.string().trim().url(), z.literal("")]).optional(),
   applicationType: z.enum(["web", "native"]),
   tokenEndpointAuthMethod: z.literal("none").default("none").optional(),
 });

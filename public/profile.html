@@ -190,6 +190,7 @@
             </div>
             <p class="muted">${app.app_url || "No website URL stored."}</p>
             <p class="muted">Redirect URI: ${app.redirect_uris?.[0] || "None"}</p>
+            <p class="muted">Back-channel logout: ${app.backchannel_logout_uri || "Not configured"}</p>
             <p class="muted">Auth method: ${app.token_endpoint_auth_method}</p>
           `;
           nodes.appsList.appendChild(article);

@@ -1,5 +1,6 @@
 import config from "../../common/config/connection.js";
 import { buildAccessTokenHash, signJwt } from "../../common/utils/jwt.js";
+import { randomBase64Url } from "../../common/utils/pkce.js";
 
 const nowInSeconds = () => Math.floor(Date.now() / 1000);
 
@@ -40,5 +41,20 @@ export const buildAccessToken = async ({ user, scope }) =>
     {
       audience: "userinfo",
       expiresIn: config.accessTokenTtlSeconds,
+    },
+  );
+
+export const buildLogoutToken = async ({ userId, clientId }) =>
+  signJwt(
+    {
+      sub: userId,
+      events: {
+        "http://schemas.openid.net/event/backchannel-logout": {},
+      },
+      jti: randomBase64Url(24),
+    },
+    {
+      audience: clientId,
+      expiresIn: 120,
     },
   );

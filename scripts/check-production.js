@@ -13,7 +13,14 @@ const requiredTables = [
 
 const requiredColumns = {
   users: ["id", "email", "password", "profile_image_url"],
-  oauth_clients: ["client_id", "client_name", "redirect_uris", "app_url", "owner_user_id"],
+  oauth_clients: [
+    "client_id",
+    "client_name",
+    "redirect_uris",
+    "app_url",
+    "owner_user_id",
+    "backchannel_logout_uri",
+  ],
   web_sessions: ["session_id", "user_id", "access_token", "refresh_token", "expires_at"],
 };
 

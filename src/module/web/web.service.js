@@ -1,6 +1,6 @@
 import { and, eq } from "drizzle-orm";
 import { db } from "../../common/db/index.js";
-import { webSessionsTable } from "../../common/db/db.js";
+import { oauthRefreshTokensTable, webSessionsTable } from "../../common/db/db.js";
 import config from "../../common/config/connection.js";
 import { createOauthFlowState, createPkcePair, randomBase64Url } from "../../common/utils/pkce.js";
 import ApiError from "../../common/utils/api-error.js";
@@ -238,8 +238,30 @@ export const getWebMe = async (session) => getUserInfoClaims(session.userId);
 
 export const getWebOwnedApps = async (session) => listClientsForOwner(session.userId);
 
-export const deleteWebSession = async (session) => {
-  await db
+export const logoutClientForUser = async (session) => {
+  const sessionRows = await db
     .delete(webSessionsTable)
-    .where(and(eq(webSessionsTable.id, session.id), eq(webSessionsTable.sessionId, session.sessionId)));
+    .where(
+      and(
+        eq(webSessionsTable.userId, session.userId),
+        eq(webSessionsTable.clientId, session.clientId),
+      ),
+    )
+    .returning({ id: webSessionsTable.id });
+
+  const refreshTokenRows = await db
+    .delete(oauthRefreshTokensTable)
+    .where(
+      and(
+        eq(oauthRefreshTokensTable.userId, session.userId),
+        eq(oauthRefreshTokensTable.clientId, session.clientId),
+      ),
+    )
+    .returning({ id: oauthRefreshTokensTable.id });
+
+  return {
+    clientId: session.clientId,
+    sessionsEnded: sessionRows.length,
+    refreshTokensRevoked: refreshTokenRows.length,
+  };
 };

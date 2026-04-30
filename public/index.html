@@ -3,144 +3,124 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>OIDC Auth</title>
+    <title>OIDCFlow</title>
     <link rel="stylesheet" href="/styles.css" />
   </head>
   <body>
     <main class="page">
-      <div class="site-shell stack" style="gap: 28px">
+      <div class="site-shell stack" style="gap: 42px">
         <header class="topbar">
           <a class="brand" href="/">
             <span class="brand-mark">O</span>
-            <span class="brand-copy">OIDC Auth</span>
+            <span class="brand-copy">OIDCFlow</span>
           </a>
 
           <nav class="topnav" aria-label="Primary">
             <a class="nav-link active" href="/">Home</a>
-            <a class="nav-link" href="/client-register.html">Register app</a>
+            <a class="nav-link" href="/web/login">Sign In</a>
+            <a class="nav-link" href="/web/signup">Create Account</a>
+            <a class="nav-link" href="/client-register.html">Register App</a>
+            <a class="nav-link" href="/profile.html">Profile</a>
           </nav>
+
+          <div class="inline" style="justify-content: flex-end">
+            <a class="button button-primary" href="/web/login" style="min-height: 46px">
+              Get Started
+            </a>
+          </div>
         </header>
 
         <section class="card hero-card">
-          <div class="card-body stack" style="gap: 28px">
+          <div class="card-body">
             <div class="hero-grid">
-              <div class="stack" style="gap: 26px">
-                <p class="eyebrow" id="heroEyebrow">Educational OIDC demo</p>
-                <h1 class="title" id="heroTitle">OIDC Auth</h1>
-                <p class="description lead" id="heroDescription">
-                  Learn how an OIDC identity provider works with a clean,
-                  browser-friendly web session layered on top.
+              <div class="stack" style="gap: 30px">
+                <h1 class="title">
+                  Modern Identity for <em>thoughtful</em> applications.
+                </h1>
+                <p class="description lead">
+                  A minimal, secure, and beautiful authentication layer for your users.
+                  Seamlessly integrate OIDC into your stack with zero friction.
                 </p>
 
-                <div class="inline" id="guestActions">
-                  <a class="button button-primary" href="/web/login">Login</a>
-                  <a class="button button-secondary" href="/web/signup">Register user</a>
-                  <a class="button button-secondary" href="/client-register.html">Register app</a>
+                <div class="inline">
+                  <a class="button button-primary" href="/web/login">
+                    Start Building <span aria-hidden="true">→</span>
+                  </a>
+                  <a class="button button-secondary" href="/.well-known/openid-configuration">
+                    View OIDC Discovery
+                  </a>
                 </div>
-
-                <section class="notice stack" style="gap: 10px">
-                  <strong>Proof of concept</strong>
-                  <p class="muted">
-                    This project is for educational purposes and learning OIDC
-                    and OAuth 2.0 internals. It is not positioned as
-                    production-ready identity infrastructure.
-                  </p>
-                </section>
               </div>
 
-              <div class="stack" id="guestColumn">
-                <section class="panel stack">
-                  <h2 style="margin: 0">Get started</h2>
-                  <p class="muted">
-                    Choose what you want to test in this OIDC proof of concept.
-                  </p>
-                  <div class="summary-grid">
-                    <div class="notice">
-                      <strong>Register user</strong>
-                      <p class="muted">
-                        Create a local user account and land back on your
-                        profile after the BFF login flow completes.
-                      </p>
+              <div class="mock-shell" aria-hidden="true">
+                <div class="mock-window">
+                  <div class="mock-head">
+                    <div class="traffic">
+                      <span></span>
+                      <span></span>
+                      <span></span>
                     </div>
-                    <div class="notice">
-                      <strong>Register app</strong>
-                      <p class="muted">
-                        Add a website name, website URL, and redirect URL to get
-                        a client ID for your demo client.
-                      </p>
-                    </div>
+                    <span>Auth-Console / v2.4</span>
                   </div>
-                </section>
+                  <div class="mock-line"></div>
+                  <div class="mock-input"></div>
+                  <div class="mock-line" style="width: 50%"></div>
+                  <div class="mock-input"></div>
+                  <div class="mock-button"></div>
+                  <div class="mock-dots">
+                    <span class="mock-dot"></span>
+                    <span class="mock-dot"></span>
+                    <span class="mock-dot"></span>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
         </section>
 
-        <section class="sidebar-grid">
-          <article class="panel stack">
-            <h2 style="margin: 0">How this frontend works</h2>
-            <p class="description">
-              The browser only keeps an HttpOnly session cookie. The backend
-              stores the OAuth tokens and exposes a small BFF surface through
-              <span class="code">/web/me</span>,
-              <span class="code">/web/apps</span>, and
-              <span class="code">/web/logout</span>.
-            </p>
+        <p class="quick-label">Quick Actions</p>
 
-            <div class="summary-grid">
-              <div class="notice">
-                <strong>Login</strong>
-                <p class="muted">
-                  Starts a server-managed login flow and keeps tokens on the
-                  backend instead of in browser JavaScript.
-                </p>
-              </div>
-              <div class="notice">
-                <strong>Register app</strong>
-                <p class="muted">
-                  Shows client ID by default and only displays a client secret
-                  if the backend actually returns one.
-                </p>
-              </div>
+        <section class="quick-grid">
+          <article class="panel action-card">
+            <span class="action-icon">⌘</span>
+            <div class="stack" style="gap: 12px">
+              <h2 style="margin: 0">Go to Dashboard</h2>
+              <p class="description">
+                Manage your user profile, registered apps, and active web session.
+              </p>
             </div>
+            <a class="action-link" href="/profile.html">Enter Dashboard <span aria-hidden="true">›</span></a>
           </article>
 
-          <aside class="panel stack">
-            <h2 style="margin: 0">Quick actions</h2>
-            <a class="button button-secondary full-width" href="/client-register.html">
-              Register your app
+          <article class="panel action-card">
+            <span class="action-icon orange">+</span>
+            <div class="stack" style="gap: 12px">
+              <h2 style="margin: 0">Register New App</h2>
+              <p class="description">
+                Create a new OAuth client and configure callback redirects.
+              </p>
+            </div>
+            <a class="action-link orange" href="/client-register.html">
+              Create App <span aria-hidden="true">›</span>
             </a>
-            <a
-              class="button button-secondary full-width"
-              href="/.well-known/openid-configuration"
-            >
-              Open discovery JSON
+          </article>
+
+          <article class="panel action-card">
+            <span class="action-icon blue">□</span>
+            <div class="stack" style="gap: 12px">
+              <h2 style="margin: 0">OIDC Discovery</h2>
+              <p class="description">
+                Inspect discovery metadata, JWKS, and the OIDC endpoints exposed by this IdP.
+              </p>
+            </div>
+            <a class="action-link blue" href="/.well-known/openid-configuration">
+              View Discovery <span aria-hidden="true">›</span>
             </a>
-            <button
-              class="button button-secondary full-width"
-              id="refreshSession"
-              type="button"
-              disabled
-            >
-              Refresh web session
-            </button>
-          </aside>
+          </article>
         </section>
 
         <footer class="footer">Made for learning how OIDC flows work under the hood.</footer>
       </div>
     </main>
-
-    <script type="module">
-      import { apiPost } from "/lib/api.js";
-
-      document.getElementById("refreshSession").addEventListener("click", async () => {
-        try {
-          await apiPost("/web/refresh");
-        } catch (error) {
-          console.error(error);
-        }
-      });
-    </script>
   </body>
 </html>

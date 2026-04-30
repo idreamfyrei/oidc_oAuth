@@ -18,6 +18,10 @@ export const apiRequest = async (url, options = {}) => {
   const payload = await parseJsonSafe(response);
 
   if (!response.ok) {
+    if (response.status >= 500) {
+      throw new Error("Something went wrong on our side. Please try again in a moment.");
+    }
+
     const message =
       payload?.message || payload?.error_description || payload?.error || "Request failed.";
     throw new Error(message);

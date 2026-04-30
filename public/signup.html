@@ -118,7 +118,7 @@
 
         const parts = cleaned.split(" ");
         if (parts.length === 1) {
-          return { firstName: parts[0], lastName: parts[0] };
+          return { firstName: parts[0], lastName: "" };
         }
 
         return {
@@ -138,8 +138,8 @@
 
           const { firstName, lastName } = splitFullName(form.fullName.value);
 
-          if (!firstName || !lastName) {
-            throw new Error("Please enter your full name.");
+          if (!firstName) {
+            throw new Error("Please enter your name.");
           }
 
           const formData = new FormData();

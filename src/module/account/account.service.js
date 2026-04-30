@@ -26,7 +26,7 @@ export const registerAccount = async ({ body, file }) => {
     .insert(usersTable)
     .values({
       firstName: parsed.firstName,
-      lastName: parsed.lastName,
+      lastName: parsed.lastName || null,
       email: parsed.email,
       password: passwordHash,
       profileImageURL: uploadResult?.url || null,

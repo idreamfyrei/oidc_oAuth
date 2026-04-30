@@ -90,6 +90,7 @@ Default local URL:
 http://localhost:8000
 ```
 
+```
 Use `.env.example` as the environment variable reference.
 pnpm db:migrate
 pnpm check:production
@@ -130,23 +131,7 @@ If they do not match, token exchange fails (`invalid_grant`).
 
 ## OIDC Authorization Code Flow
 
-```mermaid
-sequenceDiagram
-    participant U as User
-    participant C as Client App
-    participant P as OIDC Provider (this project)
-
-    U->>C: Click "Sign in"
-    C->>P: GET /oauth/authorize\n(client_id, redirect_uri, scope, state, nonce,\ncode_challenge, code_challenge_method=S256)
-    P->>U: Show login/consent UI
-    U->>P: Authenticate and approve
-    P->>C: Redirect with ?code=...&state=...
-    C->>P: POST /oauth/token\n(grant_type=authorization_code, code,\nredirect_uri, client_id, code_verifier)
-    P->>P: Validate code + PKCE + redirect_uri/client_id
-    P->>C: access_token + id_token + refresh_token
-    C->>P: GET /oauth/userinfo (Bearer access_token)
-    P->>C: User claims
-```
+<img width="528" height="747" alt="image" src="https://github.com/user-attachments/assets/195559e2-faf5-4d08-9ccd-577b65c8b463" />
 
 In words:
 
@@ -156,6 +141,8 @@ In words:
 - The provider issues tokens and the client can call `/oauth/userinfo`.
 
 ## Backend For Frontend Demo Flow
+
+<img width="517" height="655" alt="image" src="https://github.com/user-attachments/assets/0becd953-3e9d-4e02-ba57-57fead3270df" />
 
 In words:
 
@@ -262,7 +249,7 @@ Used for server-to-server back-channel logout notifications sent to a client's r
 }
 ```
 
-### Refresh Token (Opaque string)
+### Refresh Token
 
 Used to request new access/ID tokens without re-authenticating.
 

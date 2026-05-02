@@ -1,9 +1,10 @@
 import ApiResponse from "../../common/utils/api-response.js";
-import { clientIdParamSchema, registerClientSchema } from "./client.schema.js";
+import { clientIdParamSchema, companyRegisterSchema, registerClientSchema } from "./client.schema.js";
 import {
   getClientByClientId,
   listClients,
   registerClientApplication,
+  registerCompany,
 } from "./client.service.js";
 import { getWebSessionFromRequest } from "../web/web.service.js";
 
@@ -39,6 +40,16 @@ export const getClientPublicDetails = async (req, res, next) => {
     }
 
     return res.json(client);
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const companyRegister = async (req, res, next) => {
+  try {
+    const payload = companyRegisterSchema.parse(req.body);
+    const result = await registerCompany(payload);
+    return ApiResponse.created(res, "Company and account registered.", result);
   } catch (error) {
     next(error);
   }

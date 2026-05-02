@@ -5,7 +5,9 @@ import {
   handleWebLoginCallback,
   logoutWebSession,
   openDashboard,
+  openRegisterPage,
   refreshWebSession,
+  startExternalLogin,
   startWebLoginPage,
   startWebLogin,
   startWebSignupPage,
@@ -14,6 +16,8 @@ import { requireWebSession } from "./web.middleware.js";
 
 const webRouter = Router();
 
+webRouter.get("/authorize", startExternalLogin);
+webRouter.get("/register", openRegisterPage);
 webRouter.get("/login/start", startWebLogin);
 webRouter.get("/login", startWebLoginPage);
 webRouter.get("/signin", startWebLoginPage);

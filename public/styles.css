@@ -786,6 +786,40 @@ button {
   gap: 14px;
 }
 
+.service-card-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.endpoint-badge {
+  font-family: "SFMono-Regular", Menlo, Consolas, monospace;
+  font-size: 0.76rem;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 999px;
+  color: hsl(var(--accent-strong));
+  background: hsl(var(--accent-soft));
+  border: 1px solid hsl(var(--accent) / 0.25);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 220px;
+}
+
+.endpoint-badge.orange {
+  color: hsl(var(--orange));
+  background: hsl(31 90% 94%);
+  border-color: hsl(var(--orange) / 0.25);
+}
+
+.endpoint-badge.blue {
+  color: hsl(var(--blue));
+  background: hsl(222 84% 96%);
+  border-color: hsl(var(--blue) / 0.25);
+}
+
 .service-title {
   margin: 0;
   font-size: 1.05rem;

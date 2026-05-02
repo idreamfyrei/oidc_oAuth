@@ -1,5 +1,6 @@
 import { Router } from "express";
 import {
+  companyRegister,
   getClientPublicDetails,
   getClients,
   registerClient,
@@ -7,6 +8,7 @@ import {
 
 const clientRouter = Router();
 
+clientRouter.post("/company/register", companyRegister);
 clientRouter.get("/clients", getClients);
 clientRouter.post("/clients/register", registerClient);
 clientRouter.get("/clients/:clientId", getClientPublicDetails);

@@ -12,6 +12,11 @@ export const findUserById = async (userId) => {
   return rows[0] || null;
 };
 
+export const createUser = async (data) => {
+  const rows = await db.insert(usersTable).values(data).returning();
+  return rows[0];
+};
+
 export const buildUserProfile = (user) => ({
   sub: user.id,
   name: [user.firstName, user.lastName].filter(Boolean).join(" ").trim(),

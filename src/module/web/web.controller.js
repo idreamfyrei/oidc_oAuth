@@ -1,7 +1,10 @@
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 import ApiResponse from "../../common/utils/api-response.js";
 import { notifyBackchannelLogout } from "../oauth/backchannel-logout.service.js";
 import { getClientByClientId } from "../client/client.service.js";
 import {
+  buildExternalLoginRedirect,
   buildFlowCookieHeader,
   buildWebAuthPageStartResult,
   buildWebLoginStartResult,
@@ -15,6 +18,22 @@ import {
   logoutClientForUser,
   refreshWebSessionTokens,
 } from "./web.service.js";
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const publicDir = path.resolve(__dirname, "../../../public");
+
+export const startExternalLogin = async (req, res, next) => {
+  try {
+    const loginUrl = await buildExternalLoginRedirect(req.query);
+    return res.redirect(302, loginUrl);
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const openRegisterPage = (_req, res) => {
+  res.sendFile(path.join(publicDir, "client-register.html"));
+};
 
 export const startWebLogin = async (req, res, next) => {
   try {

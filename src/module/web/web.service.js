@@ -6,6 +6,7 @@ import { createOauthFlowState, createPkcePair, randomBase64Url } from "../../com
 import ApiError from "../../common/utils/api-error.js";
 import { verifyJwt } from "../../common/utils/jwt.js";
 import { exchangeAuthorizationCode, exchangeRefreshToken, getUserInfoClaims } from "../oauth/oauth.service.js";
+import { validateAuthorizeRequest } from "../oauth/authorize.service.js";
 import { listClientsForOwner } from "../client/client.service.js";
 import { webLoginCallbackSchema } from "./web.schema.js";
 
@@ -68,6 +69,15 @@ const buildWebFlowContext = () => {
     flowPayload,
     query,
   };
+};
+
+export const buildExternalLoginRedirect = async (query) => {
+  await validateAuthorizeRequest(query);
+  const target = new URL("/authenticate.html", config.issuer);
+  for (const [k, v] of Object.entries(query)) {
+    if (typeof v === "string") target.searchParams.set(k, v);
+  }
+  return target.toString();
 };
 
 export const buildWebLoginStartResult = () => {

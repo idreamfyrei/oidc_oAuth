@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>OIDCFlow - Register Your Company</title>
+    <title>OIDCFlow - Register Your App</title>
     <link rel="stylesheet" href="/styles.css" />
   </head>
   <body>
@@ -18,29 +18,69 @@
           </div>
 
           <div class="stack centered" style="gap: 12px" id="registerIntro">
-            <h1 class="form-title">Register your company</h1>
+            <h1 class="form-title">Register your app</h1>
             <p class="description lead">
-              Connect your application to OIDCFlow and let your users sign in
-              securely using the OAuth 2.0 Authorization Code Flow with PKCE.
+              Create an admin account and connect your application to OIDCFlow.
+              You'll receive a client ID for use in the OAuth 2.0 Authorization Code Flow with PKCE.
             </p>
           </div>
 
-          <form class="stack" id="clientForm" novalidate>
+          <form class="stack" id="registerForm" novalidate>
+            <div class="splitter" style="margin-bottom: 4px">YOUR ACCOUNT</div>
+
             <div class="field">
-              <label for="clientName">Company / Application name</label>
+              <label for="fullName">Full name</label>
+              <input
+                class="input"
+                id="fullName"
+                placeholder="Jane Doe"
+                autocomplete="name"
+                required
+              />
+            </div>
+
+            <div class="field">
+              <label for="email">Email address</label>
+              <input
+                class="input"
+                id="email"
+                type="email"
+                placeholder="you@company.com"
+                autocomplete="email"
+                required
+              />
+            </div>
+
+            <div class="field">
+              <label for="password">Password</label>
+              <input
+                class="input"
+                id="password"
+                type="password"
+                minlength="8"
+                placeholder="Minimum 8 characters"
+                autocomplete="new-password"
+                required
+              />
+            </div>
+
+            <div class="splitter" style="margin-bottom: 4px">YOUR APP</div>
+
+            <div class="field">
+              <label for="clientName">App / company name</label>
               <input class="input" id="clientName" required placeholder="Acme Corp" />
               <p class="helper">The name users will see on the consent screen.</p>
             </div>
 
             <div class="field">
-              <label for="websiteUrl">Company website</label>
+              <label for="websiteUrl">App website</label>
               <input
                 class="input"
                 id="websiteUrl"
                 type="url"
                 placeholder="https://acmecorp.com"
+                autocomplete="url"
               />
-              <p class="helper">Your company homepage, shown to users during sign-in.</p>
             </div>
 
             <div class="field">
@@ -56,7 +96,7 @@
             </div>
 
             <div class="field">
-              <label for="backchannelLogoutUri">Back-channel logout URI (optional)</label>
+              <label for="backchannelLogoutUri">Back-channel logout URI <span style="font-weight: 500; color: hsl(var(--text-soft))">(optional)</span></label>
               <input
                 class="input"
                 id="backchannelLogoutUri"
@@ -64,23 +104,23 @@
                 placeholder="https://acmecorp.com/oidc/logout"
               />
               <p class="helper">
-                A server endpoint that receives logout tokens when a user signs out.
-                Enables session termination across all connected apps.
+                A server endpoint that receives logout tokens when a user signs out —
+                enables session termination across all connected apps.
               </p>
             </div>
 
             <div class="field">
-              <label for="clientId">Client ID override (optional)</label>
+              <label for="clientId">Client ID override <span style="font-weight: 500; color: hsl(var(--text-soft))">(optional)</span></label>
               <input
                 class="input"
                 id="clientId"
                 placeholder="Leave blank to auto-generate"
               />
-              <p class="helper">A custom identifier for your client. Auto-generated if left blank.</p>
+              <p class="helper">Only letters, digits, <span class="code">.</span> <span class="code">_</span> <span class="code">-</span> allowed.</p>
             </div>
 
             <button class="button button-primary full-width" type="submit">
-              Register company
+              Register app
             </button>
           </form>
 
@@ -89,24 +129,29 @@
           <div class="splitter">OR</div>
 
           <p class="description centered">
-            Looking to create a user account?
-            <a href="/signup"><strong>Sign up as a user</strong></a>
+            Already have an account?
+            <a href="/login"><strong>Sign in</strong></a>
           </p>
 
+          <!-- Result card -->
           <section class="stack hidden" id="resultCard" style="gap: 22px">
             <div class="stack centered" style="gap: 10px">
-              <h2 class="form-title" style="font-size: clamp(2.4rem, 4vw, 3.5rem)">Company registered</h2>
-              <p class="success">Your company has been registered successfully.</p>
+              <h2 class="form-title" style="font-size: clamp(2.4rem, 4vw, 3.5rem)">You're registered</h2>
+              <p class="success">Account and app registered successfully.</p>
             </div>
 
             <div class="notice">
               <strong>Save your Client ID.</strong> This is the only credential you need —
-              this IdP uses public clients with PKCE, so there is no client secret.
-              Share your Client ID with your development team so they can integrate the authorization flow.
+              OIDCFlow uses public clients with PKCE, so there is no client secret.
             </div>
 
             <div class="field">
-              <label>Company name</label>
+              <label>Account email</label>
+              <div class="value-box mono" id="resultEmail"></div>
+            </div>
+
+            <div class="field">
+              <label>App name</label>
               <div class="value-box mono" id="resultName"></div>
             </div>
 
@@ -118,21 +163,7 @@
                   Copy
                 </button>
               </div>
-              <p class="helper">Use this in your authorization requests as <span class="code">client_id</span>.</p>
-            </div>
-
-            <div class="field hidden" id="clientSecretField">
-              <label>Client secret</label>
-              <div class="copy-row">
-                <div class="value-box mono output" id="resultClientSecret"></div>
-                <button
-                  class="button button-primary"
-                  data-copy-target="resultClientSecret"
-                  type="button"
-                >
-                  Copy
-                </button>
-              </div>
+              <p class="helper">Use this as <span class="code">client_id</span> in your authorization requests.</p>
             </div>
 
             <div class="field">
@@ -149,20 +180,19 @@
                 </button>
               </div>
               <p class="helper">
-                Replace <span class="code">STATE_PLACEHOLDER</span>, <span class="code">NONCE_PLACEHOLDER</span>,
-                and the <span class="code">code_challenge</span> with real PKCE values generated by your app
-                before redirecting users here.
+                Replace <span class="code">STATE</span>, <span class="code">NONCE</span>, and
+                <span class="code">CODE_CHALLENGE</span> with values generated by your app before redirecting.
               </p>
             </div>
 
             <div class="splitter">NEXT STEPS</div>
 
             <div class="inline">
-              <a class="button button-primary" href="/dashboard" style="flex: 1">
-                Go to Dashboard
+              <a class="button button-primary" href="/login" style="flex: 1">
+                Sign In
               </a>
-              <a class="button button-secondary" href="/client-register.html" style="flex: 1">
-                Register another company
+              <a class="button button-secondary" href="/register" style="flex: 1">
+                Register another app
               </a>
             </div>
           </section>
@@ -173,40 +203,39 @@
     <script type="module">
       import { apiRequest } from "/lib/api.js";
 
-      const form = document.getElementById("clientForm");
+      const form = document.getElementById("registerForm");
       const error = document.getElementById("error");
 
+      const splitFullName = (value) => {
+        const cleaned = value.trim().replace(/\s+/g, " ");
+        if (!cleaned) return { firstName: "", lastName: "" };
+        const parts = cleaned.split(" ");
+        return parts.length === 1
+          ? { firstName: parts[0], lastName: "" }
+          : { firstName: parts.shift(), lastName: parts.join(" ") };
+      };
+
       const buildAuthorizeUrl = ({ clientId, redirectUri }) => {
-        const url = new URL("/oauth/authorize", window.location.origin);
+        const url = new URL("/authorize", window.location.origin);
         url.searchParams.set("client_id", clientId);
         url.searchParams.set("redirect_uri", redirectUri);
         url.searchParams.set("response_type", "code");
         url.searchParams.set("scope", "openid profile email");
-        url.searchParams.set("state", "STATE_PLACEHOLDER");
-        url.searchParams.set("nonce", "NONCE_PLACEHOLDER");
-        url.searchParams.set(
-          "code_challenge",
-          "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890-",
-        );
+        url.searchParams.set("state", "STATE");
+        url.searchParams.set("nonce", "NONCE_MIN8CHARS");
+        url.searchParams.set("code_challenge", "REPLACE_WITH_BASE64URL_PKCE_CODE_CHALLENGE_43_TO_128_CHARS");
         url.searchParams.set("code_challenge_method", "S256");
         return url.toString();
-      };
-
-      const copyText = async (elementId) => {
-        const value = document.getElementById(elementId)?.textContent || "";
-        await navigator.clipboard.writeText(value);
       };
 
       document.addEventListener("click", async (event) => {
         const button = event.target.closest("[data-copy-target]");
         if (!button) return;
-
         try {
-          await copyText(button.getAttribute("data-copy-target"));
+          const value = document.getElementById(button.getAttribute("data-copy-target"))?.textContent || "";
+          await navigator.clipboard.writeText(value);
           button.textContent = "Copied";
-          window.setTimeout(() => {
-            button.textContent = "Copy";
-          }, 1000);
+          setTimeout(() => { button.textContent = "Copy"; }, 1200);
         } catch {
           button.textContent = "Failed";
         }
@@ -217,44 +246,48 @@
         error.style.display = "none";
         error.textContent = "";
 
+        const { firstName, lastName } = splitFullName(document.getElementById("fullName").value);
+        if (!firstName) {
+          error.textContent = "Please enter your full name.";
+          error.style.display = "block";
+          return;
+        }
+
+        const redirectUri = document.getElementById("redirectUri").value.trim();
         const payload = {
+          firstName,
+          lastName,
+          email: document.getElementById("email").value.trim(),
+          password: document.getElementById("password").value,
           clientName: document.getElementById("clientName").value.trim(),
-          websiteUrl: document.getElementById("websiteUrl").value.trim(),
-          clientId: document.getElementById("clientId").value.trim() || undefined,
+          websiteUrl: document.getElementById("websiteUrl").value.trim() || undefined,
+          redirectUris: [redirectUri],
+          backchannelLogoutUri: document.getElementById("backchannelLogoutUri").value.trim() || undefined,
           applicationType: "web",
-          tokenEndpointAuthMethod: "none",
-          redirectUris: [document.getElementById("redirectUri").value.trim()],
-          backchannelLogoutUri: document.getElementById("backchannelLogoutUri").value.trim(),
+          clientId: document.getElementById("clientId").value.trim() || undefined,
         };
 
         try {
-          const result = await apiRequest("/clients/register", {
+          const result = await apiRequest("/company/register", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(payload),
           });
 
-          const client = result.data;
-          const authorizeUrl = buildAuthorizeUrl({
-            clientId: client.client_id,
-            redirectUri: client.redirect_uris[0],
-          });
+          const { user, client } = result.data;
 
-          // Populate result card
+          document.getElementById("resultEmail").textContent = user.email;
           document.getElementById("resultName").textContent = client.client_name;
           document.getElementById("resultClientId").textContent = client.client_id;
           document.getElementById("resultAuthMethod").textContent =
             client.token_endpoint_auth_method === "none"
               ? "public (no client secret — use PKCE)"
               : client.token_endpoint_auth_method;
-          document.getElementById("resultAuthorizeUrl").textContent = authorizeUrl;
+          document.getElementById("resultAuthorizeUrl").textContent = buildAuthorizeUrl({
+            clientId: client.client_id,
+            redirectUri: client.redirect_uris[0],
+          });
 
-          if (client.client_secret) {
-            document.getElementById("resultClientSecret").textContent = client.client_secret;
-            document.getElementById("clientSecretField").classList.remove("hidden");
-          }
-
-          // Hide form, show result
           document.getElementById("registerIntro").classList.add("hidden");
           form.classList.add("hidden");
           document.getElementById("resultCard").classList.remove("hidden");

@@ -1,9 +1,11 @@
 import crypto from "node:crypto";
+import bcrypt from "bcrypt";
 import { eq } from "drizzle-orm";
 import { db } from "../../common/db/index.js";
 import { oauthClientsTable } from "../../common/db/db.js";
 import config from "../../common/config/connection.js";
 import ApiError from "../../common/utils/api-error.js";
+import { findUserByEmail, createUser } from "../account/account.repository.js";
 
 const defaultClients = [
   {
@@ -103,4 +105,48 @@ export const registerClientApplication = async (payload, options = {}) => {
     .returning();
 
   return normalizeClientRow(inserted[0]);
+};
+
+export const registerCompany = async (payload) => {
+  const existing = await findUserByEmail(payload.email);
+  if (existing) {
+    throw ApiError.conflict("An account with this email already exists.");
+  }
+
+  if (payload.clientId) {
+    const existingClient = await getClientByClientId(payload.clientId);
+    if (existingClient) {
+      throw ApiError.conflict("That client_id is already in use.");
+    }
+  }
+
+  const passwordHash = await bcrypt.hash(payload.password, 10);
+  const user = await createUser({
+    firstName: payload.firstName,
+    lastName: payload.lastName || null,
+    email: payload.email,
+    password: passwordHash,
+    emailVerified: true,
+  });
+
+  const client = await registerClientApplication(
+    {
+      clientName: payload.clientName,
+      websiteUrl: payload.websiteUrl,
+      redirectUris: payload.redirectUris,
+      backchannelLogoutUri: payload.backchannelLogoutUri,
+      applicationType: payload.applicationType,
+      clientId: payload.clientId,
+    },
+    { ownerUserId: user.id },
+  );
+
+  return {
+    user: {
+      id: user.id,
+      email: user.email,
+      name: [user.firstName, user.lastName].filter(Boolean).join(" ").trim(),
+    },
+    client,
+  };
 };

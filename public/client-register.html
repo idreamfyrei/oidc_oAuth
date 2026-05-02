@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>OIDCFlow - Register App</title>
+    <title>OIDCFlow - Register Your Company</title>
     <link rel="stylesheet" href="/styles.css" />
   </head>
   <body>
@@ -11,32 +11,36 @@
       <section class="auth-shell card form-card">
         <div class="card-body stack" style="gap: 32px">
           <div class="inline" style="justify-content: center">
-            <span class="brand-mark">O</span>
-            <span class="brand-copy">OIDCFlow</span>
+            <a class="brand" href="/" style="text-decoration: none">
+              <span class="brand-mark">O</span>
+              <span class="brand-copy">OIDCFlow</span>
+            </a>
           </div>
 
           <div class="stack centered" style="gap: 12px" id="registerIntro">
-            <h1 class="form-title">Register your app</h1>
+            <h1 class="form-title">Register your company</h1>
             <p class="description lead">
-              Register an app using website name, website URL, and redirect URL.
+              Connect your application to OIDCFlow and let your users sign in
+              securely using the OAuth 2.0 Authorization Code Flow with PKCE.
             </p>
           </div>
 
           <form class="stack" id="clientForm" novalidate>
             <div class="field">
-              <label for="clientName">Application name</label>
-              <input class="input" id="clientName" required placeholder="My Awesome App" />
+              <label for="clientName">Company / Application name</label>
+              <input class="input" id="clientName" required placeholder="Acme Corp" />
+              <p class="helper">The name users will see on the consent screen.</p>
             </div>
 
             <div class="field">
-              <label for="websiteUrl">Website URL</label>
+              <label for="websiteUrl">Company website</label>
               <input
                 class="input"
                 id="websiteUrl"
                 type="url"
-                placeholder="https://myapp.com"
+                placeholder="https://acmecorp.com"
               />
-              <p class="helper">Homepage stored with the client for your profile view.</p>
+              <p class="helper">Your company homepage, shown to users during sign-in.</p>
             </div>
 
             <div class="field">
@@ -46,9 +50,9 @@
                 id="redirectUri"
                 type="url"
                 required
-                placeholder="https://myapp.com/auth/callback"
+                placeholder="https://acmecorp.com/auth/callback"
               />
-              <p class="helper">Where users are sent after authorization.</p>
+              <p class="helper">Where OIDCFlow sends users after they authorize your app.</p>
             </div>
 
             <div class="field">
@@ -57,10 +61,11 @@
                 class="input"
                 id="backchannelLogoutUri"
                 type="url"
-                placeholder="https://myapp.com/oidc/backchannel-logout"
+                placeholder="https://acmecorp.com/oidc/logout"
               />
               <p class="helper">
-                Server endpoint that receives logout tokens from the IdP.
+                A server endpoint that receives logout tokens when a user signs out.
+                Enables session termination across all connected apps.
               </p>
             </div>
 
@@ -71,10 +76,11 @@
                 id="clientId"
                 placeholder="Leave blank to auto-generate"
               />
+              <p class="helper">A custom identifier for your client. Auto-generated if left blank.</p>
             </div>
 
             <button class="button button-primary full-width" type="submit">
-              Register application
+              Register company
             </button>
           </form>
 
@@ -83,18 +89,24 @@
           <div class="splitter">OR</div>
 
           <p class="description centered">
-            Are you a user?
-            <a href="/"><strong>Go to account area</strong></a>
+            Looking to create a user account?
+            <a href="/signup"><strong>Sign up as a user</strong></a>
           </p>
 
           <section class="stack hidden" id="resultCard" style="gap: 22px">
             <div class="stack centered" style="gap: 10px">
-              <h2 class="form-title" style="font-size: clamp(2.4rem, 4vw, 3.5rem)">App registered</h2>
-              <p class="success">Your application has been registered.</p>
+              <h2 class="form-title" style="font-size: clamp(2.4rem, 4vw, 3.5rem)">Company registered</h2>
+              <p class="success">Your company has been registered successfully.</p>
+            </div>
+
+            <div class="notice">
+              <strong>Save your Client ID.</strong> This is the only credential you need —
+              this IdP uses public clients with PKCE, so there is no client secret.
+              Share your Client ID with your development team so they can integrate the authorization flow.
             </div>
 
             <div class="field">
-              <label>Application name</label>
+              <label>Company name</label>
               <div class="value-box mono" id="resultName"></div>
             </div>
 
@@ -106,6 +118,7 @@
                   Copy
                 </button>
               </div>
+              <p class="helper">Use this in your authorization requests as <span class="code">client_id</span>.</p>
             </div>
 
             <div class="field hidden" id="clientSecretField">
@@ -128,7 +141,7 @@
             </div>
 
             <div class="field">
-              <label>Login redirect URL</label>
+              <label>Authorization URL (with placeholders)</label>
               <div class="copy-row">
                 <div class="value-box mono output" id="resultAuthorizeUrl"></div>
                 <button class="button button-primary" data-copy-target="resultAuthorizeUrl" type="button">
@@ -136,20 +149,22 @@
                 </button>
               </div>
               <p class="helper">
-                Replace the placeholder values for <span class="code">state</span>,
-                <span class="code">nonce</span>, and PKCE values before using this URL in a real client.
+                Replace <span class="code">STATE_PLACEHOLDER</span>, <span class="code">NONCE_PLACEHOLDER</span>,
+                and the <span class="code">code_challenge</span> with real PKCE values generated by your app
+                before redirecting users here.
               </p>
             </div>
 
-            <div class="warning-card">
-              A client secret is only shown when the backend actually issues one.
+            <div class="splitter">NEXT STEPS</div>
+
+            <div class="inline">
+              <a class="button button-primary" href="/dashboard" style="flex: 1">
+                Go to Dashboard
+              </a>
+              <a class="button button-secondary" href="/client-register.html" style="flex: 1">
+                Register another company
+              </a>
             </div>
-
-            <div class="splitter">NEXT</div>
-
-            <a class="button button-secondary full-width" href="/client-register.html">
-              Register another app
-            </a>
           </section>
         </div>
       </section>
@@ -220,20 +235,30 @@
           });
 
           const client = result.data;
-          sessionStorage.setItem(
-            "oidc_auth_last_registered_app",
-            JSON.stringify({
-              client_name: client.client_name,
-              client_id: client.client_id,
-              client_secret: client.client_secret || null,
-              token_endpoint_auth_method: client.token_endpoint_auth_method,
-              authorize_url: buildAuthorizeUrl({
-                clientId: client.client_id,
-                redirectUri: client.redirect_uris[0],
-              }),
-            }),
-          );
-          window.location.href = "/dashboard";
+          const authorizeUrl = buildAuthorizeUrl({
+            clientId: client.client_id,
+            redirectUri: client.redirect_uris[0],
+          });
+
+          // Populate result card
+          document.getElementById("resultName").textContent = client.client_name;
+          document.getElementById("resultClientId").textContent = client.client_id;
+          document.getElementById("resultAuthMethod").textContent =
+            client.token_endpoint_auth_method === "none"
+              ? "public (no client secret — use PKCE)"
+              : client.token_endpoint_auth_method;
+          document.getElementById("resultAuthorizeUrl").textContent = authorizeUrl;
+
+          if (client.client_secret) {
+            document.getElementById("resultClientSecret").textContent = client.client_secret;
+            document.getElementById("clientSecretField").classList.remove("hidden");
+          }
+
+          // Hide form, show result
+          document.getElementById("registerIntro").classList.add("hidden");
+          form.classList.add("hidden");
+          document.getElementById("resultCard").classList.remove("hidden");
+          window.scrollTo({ top: 0, behavior: "smooth" });
         } catch (requestError) {
           error.textContent = requestError.message;
           error.style.display = "block";

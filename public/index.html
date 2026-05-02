@@ -3,12 +3,12 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>OIDCFlow</title>
+    <title>OIDCFlow - Identity Provider</title>
     <link rel="stylesheet" href="/styles.css" />
   </head>
   <body>
     <main class="page">
-      <div class="site-shell stack" style="gap: 42px">
+      <div class="site-shell stack" style="gap: 80px">
         <header class="topbar">
           <a class="brand" href="/">
             <span class="brand-mark">O</span>
@@ -17,37 +17,39 @@
 
           <nav class="topnav" aria-label="Primary">
             <a class="nav-link active" href="/">Home</a>
+            <a class="nav-link" href="/signup">For Users</a>
+            <a class="nav-link" href="/client-register.html">For Companies</a>
             <a class="nav-link" href="/login">Sign In</a>
-            <a class="nav-link" href="/signup">Create Account</a>
-            <a class="nav-link" href="/client-register.html">Register App</a>
-            <a class="nav-link" href="/dashboard">Profile</a>
+            <a class="nav-link" href="/dashboard">Dashboard</a>
           </nav>
 
           <div class="inline" style="justify-content: flex-end">
-            <a class="button button-primary" href="/login" style="min-height: 46px">
+            <a class="button button-primary" href="/signup" style="min-height: 46px">
               Get Started
             </a>
           </div>
         </header>
 
+        <!-- Hero -->
         <section class="card hero-card">
           <div class="card-body">
             <div class="hero-grid">
               <div class="stack" style="gap: 30px">
+                <p class="eyebrow">Educational OIDC Provider</p>
                 <h1 class="title">
-                  Modern Identity for <em>thoughtful</em> applications.
+                  Identity built <em>for everyone</em>.
                 </h1>
                 <p class="description lead">
-                  A minimal, secure, and beautiful authentication layer for your users.
-                  Seamlessly integrate OIDC into your stack with zero friction.
+                  OIDCFlow is an open identity provider. Users get one secure account.
+                  Companies integrate OIDC in minutes. Built to the spec, designed for learning.
                 </p>
 
                 <div class="inline">
-                  <a class="button button-primary" href="/login">
-                    Start Building <span aria-hidden="true">→</span>
+                  <a class="button button-primary" href="/signup">
+                    Create Account <span aria-hidden="true">→</span>
                   </a>
-                  <a class="button button-secondary" href="/.well-known/openid-configuration">
-                    View OIDC Discovery
+                  <a class="button button-secondary" href="/client-register.html">
+                    Register Your Company
                   </a>
                 </div>
               </div>
@@ -60,7 +62,7 @@
                       <span></span>
                       <span></span>
                     </div>
-                    <span>Auth-Console / v2.4</span>
+                    <span>OIDCFlow / Identity</span>
                   </div>
                   <div class="mock-line"></div>
                   <div class="mock-input"></div>
@@ -78,30 +80,198 @@
           </div>
         </section>
 
-        <p class="quick-label">Quick Actions</p>
+        <!-- Who is this for? -->
+        <section class="stack" style="gap: 32px">
+          <div class="stack centered" style="gap: 14px">
+            <p class="eyebrow">Who is this for?</p>
+            <h2 class="section-title">Two ways to get started</h2>
+            <p class="description lead centered">
+              Whether you are a user looking for a secure login experience or a company
+              wanting to delegate identity, OIDCFlow has you covered.
+            </p>
+          </div>
+
+          <div class="who-grid">
+            <div class="panel who-card">
+              <span class="action-icon" style="width: 52px; height: 52px; font-size: 1.5rem; border-radius: 16px">U</span>
+              <div class="stack" style="gap: 10px">
+                <h3 class="service-title" style="font-size: 1.25rem">For Users</h3>
+                <p class="description">
+                  Create a personal account and use it to sign in to any application
+                  that integrates with OIDCFlow. One identity, every connected app.
+                </p>
+              </div>
+              <ul class="feature-list">
+                <li>Single sign-on across all connected apps</li>
+                <li>Secure, bcrypt-hashed password storage</li>
+                <li>Manage your profile and connected services</li>
+                <li>Grant and review app access</li>
+              </ul>
+              <a class="button button-primary" href="/signup">Create Your Account <span aria-hidden="true">→</span></a>
+            </div>
+
+            <div class="panel who-card">
+              <span class="action-icon orange" style="width: 52px; height: 52px; font-size: 1.5rem; border-radius: 16px">C</span>
+              <div class="stack" style="gap: 10px">
+                <h3 class="service-title" style="font-size: 1.25rem">For Companies &amp; Developers</h3>
+                <p class="description">
+                  Register your application and let OIDCFlow handle user authentication.
+                  Get a client ID, set redirect URIs, and integrate in minutes.
+                </p>
+              </div>
+              <ul class="feature-list">
+                <li>OAuth 2.0 Authorization Code Flow with PKCE</li>
+                <li>Standards-compliant OIDC discovery &amp; JWKS</li>
+                <li>Back-channel logout for secure session termination</li>
+                <li>RS256-signed JWT tokens out of the box</li>
+              </ul>
+              <a class="button button-secondary" href="/client-register.html">Register Your Company <span aria-hidden="true">→</span></a>
+            </div>
+          </div>
+        </section>
+
+        <!-- Services -->
+        <section class="stack" style="gap: 32px">
+          <div class="stack centered" style="gap: 14px">
+            <p class="eyebrow">Services</p>
+            <h2 class="section-title">What OIDCFlow offers</h2>
+            <p class="description lead centered">
+              A complete OIDC identity provider built to the spec — designed to show exactly
+              how authentication works under the hood.
+            </p>
+          </div>
+
+          <div class="services-grid">
+            <div class="panel service-card">
+              <span class="action-icon" style="font-size: 1rem; font-weight: 900">ID</span>
+              <h3 class="service-title">OIDC Identity Provider</h3>
+              <p class="description">
+                Standards-compliant OpenID Connect provider exposing discovery,
+                JWKS, authorization, token, and userinfo endpoints.
+              </p>
+            </div>
+
+            <div class="panel service-card">
+              <span class="action-icon orange" style="font-size: 1.3rem">⇄</span>
+              <h3 class="service-title">OAuth 2.0 Auth Code Flow</h3>
+              <p class="description">
+                Full Authorization Code Flow for securely issuing tokens to web and
+                mobile apps after user consent.
+              </p>
+            </div>
+
+            <div class="panel service-card">
+              <span class="action-icon blue" style="font-size: 1rem; font-weight: 900">#</span>
+              <h3 class="service-title">PKCE Protection</h3>
+              <p class="description">
+                Proof Key for Code Exchange (RFC 7636) prevents authorization code
+                interception attacks — required for public clients.
+              </p>
+            </div>
+
+            <div class="panel service-card">
+              <span class="action-icon" style="font-size: 1rem; font-weight: 900">JWT</span>
+              <h3 class="service-title">Signed JWT Tokens</h3>
+              <p class="description">
+                RS256-signed access tokens, ID tokens, and opaque refresh tokens.
+                Public keys published via JWKS for independent verification.
+              </p>
+            </div>
+
+            <div class="panel service-card">
+              <span class="action-icon orange" style="font-size: 1.3rem">∞</span>
+              <h3 class="service-title">Single Sign-On (SSO)</h3>
+              <p class="description">
+                Users authenticate once with OIDCFlow and seamlessly access all
+                connected applications without re-entering credentials.
+              </p>
+            </div>
+
+            <div class="panel service-card">
+              <span class="action-icon blue" style="font-size: 1.3rem">↩</span>
+              <h3 class="service-title">Back-channel Logout</h3>
+              <p class="description">
+                Secure server-to-server logout notifications so connected apps can
+                invalidate sessions when a user signs out from any client.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <!-- How it works -->
+        <section class="stack" style="gap: 32px">
+          <div class="stack centered" style="gap: 14px">
+            <p class="eyebrow">How it works</p>
+            <h2 class="section-title">From registration to tokens</h2>
+            <p class="description lead centered">
+              Four steps to integrate OIDCFlow into your application.
+            </p>
+          </div>
+
+          <div class="steps-grid">
+            <div class="panel step-card">
+              <span class="step-num">1</span>
+              <h3 class="service-title">Register your company</h3>
+              <p class="description">
+                Sign up as a company, receive a unique client ID, and configure
+                your redirect URI and optional back-channel logout endpoint.
+              </p>
+            </div>
+
+            <div class="panel step-card">
+              <span class="step-num">2</span>
+              <h3 class="service-title">Redirect to OIDCFlow</h3>
+              <p class="description">
+                When a user wants to log in, redirect them to the authorization
+                endpoint with a PKCE code challenge and your client ID.
+              </p>
+            </div>
+
+            <div class="panel step-card">
+              <span class="step-num">3</span>
+              <h3 class="service-title">User authenticates</h3>
+              <p class="description">
+                Users sign in with their OIDCFlow account and grant consent
+                for the requested scopes (openid, profile, email).
+              </p>
+            </div>
+
+            <div class="panel step-card">
+              <span class="step-num">4</span>
+              <h3 class="service-title">Exchange for tokens</h3>
+              <p class="description">
+                Exchange the short-lived authorization code for JWT access, ID,
+                and refresh tokens. Call userinfo to get user claims.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <!-- Developer tools -->
+        <p class="quick-label">Developer Tools</p>
 
         <section class="quick-grid">
           <article class="panel action-card">
             <span class="action-icon">⌘</span>
             <div class="stack" style="gap: 12px">
-              <h2 style="margin: 0">Go to Dashboard</h2>
+              <h2 style="margin: 0">Dashboard</h2>
               <p class="description">
-                Manage your user profile, registered apps, and active web session.
+                Manage your profile, view registered apps, and control your active session.
               </p>
             </div>
-            <a class="action-link" href="/dashboard">Enter Dashboard <span aria-hidden="true">›</span></a>
+            <a class="action-link" href="/dashboard">Open Dashboard <span aria-hidden="true">›</span></a>
           </article>
 
           <article class="panel action-card">
             <span class="action-icon orange">+</span>
             <div class="stack" style="gap: 12px">
-              <h2 style="margin: 0">Register New App</h2>
+              <h2 style="margin: 0">Register Company</h2>
               <p class="description">
-                Create a new OAuth client and configure callback redirects.
+                Register your company as an OAuth client and receive your client ID.
               </p>
             </div>
             <a class="action-link orange" href="/client-register.html">
-              Create App <span aria-hidden="true">›</span>
+              Register Now <span aria-hidden="true">›</span>
             </a>
           </article>
 
@@ -110,7 +280,7 @@
             <div class="stack" style="gap: 12px">
               <h2 style="margin: 0">OIDC Discovery</h2>
               <p class="description">
-                Inspect discovery metadata, JWKS, and the OIDC endpoints exposed by this IdP.
+                Inspect discovery metadata, JWKS, and all endpoints exposed by this IdP.
               </p>
             </div>
             <a class="action-link blue" href="/.well-known/openid-configuration">
@@ -119,7 +289,9 @@
           </article>
         </section>
 
-        <footer class="footer">Made for learning how OIDC flows work under the hood.</footer>
+        <footer class="footer">
+          OIDCFlow — an educational identity provider for learning OAuth 2.0 and OpenID Connect.
+        </footer>
       </div>
     </main>
   </body>

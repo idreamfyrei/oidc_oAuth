@@ -750,6 +750,74 @@ button {
   padding: 0.12rem 0.44rem;
 }
 
+/* ── Landing page: who-grid ── */
+.who-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 28px;
+}
+
+.who-card {
+  display: grid;
+  align-content: start;
+  gap: 24px;
+}
+
+.feature-list {
+  margin: 0;
+  padding: 0 0 0 20px;
+  display: grid;
+  gap: 8px;
+  color: hsl(var(--text-muted));
+  line-height: 1.55;
+  font-size: 0.97rem;
+}
+
+/* ── Landing page: services grid ── */
+.services-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 22px;
+}
+
+.service-card {
+  display: grid;
+  align-content: start;
+  gap: 14px;
+}
+
+.service-title {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 800;
+}
+
+/* ── Landing page: how-it-works steps ── */
+.steps-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 22px;
+}
+
+.step-card {
+  display: grid;
+  align-content: start;
+  gap: 14px;
+}
+
+.step-num {
+  width: 42px;
+  height: 42px;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  font-size: 1.1rem;
+  font-weight: 800;
+  background: hsl(var(--accent));
+  color: white;
+  flex-shrink: 0;
+}
+
 @media (max-width: 1120px) {
   .topbar {
     grid-template-columns: 1fr;
@@ -769,6 +837,21 @@ button {
   }
 
   .metrics-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .who-grid,
+  .services-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .steps-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 760px) {
+  .steps-grid {
     grid-template-columns: 1fr;
   }
 }

@@ -5,7 +5,12 @@ import config from "../../common/config/connection.js";
 import { createOauthFlowState, createPkcePair, randomBase64Url } from "../../common/utils/pkce.js";
 import ApiError from "../../common/utils/api-error.js";
 import { verifyJwt } from "../../common/utils/jwt.js";
-import { exchangeAuthorizationCode, exchangeRefreshToken, getUserInfoClaims } from "../oauth/oauth.service.js";
+import {
+  exchangeAuthorizationCode,
+  exchangeRefreshToken,
+  getUserInfoClaims,
+  issueAuthorizationRedirect,
+} from "../oauth/oauth.service.js";
 import { validateAuthorizeRequest } from "../oauth/authorize.service.js";
 import { listClientsForOwner } from "../client/client.service.js";
 import { webLoginCallbackSchema } from "./web.schema.js";
@@ -78,6 +83,24 @@ export const buildExternalLoginRedirect = async (query) => {
     if (typeof v === "string") target.searchParams.set(k, v);
   }
   return target.toString();
+};
+
+export const hasWebSessionCookie = (req) => {
+  const cookies = parseCookieHeader(req.headers.cookie || "");
+  return Boolean(cookies[config.webSessionCookieName]);
+};
+
+export const buildExternalSessionRedirect = async ({ query, req }) => {
+  const authorizeRequest = await validateAuthorizeRequest(query);
+  const session = await getWebSessionFromRequest(req);
+  const user = await findUserById(session.userId);
+
+  if (!user) {
+    throw ApiError.unauthorized("Signed-in user no longer exists.");
+  }
+
+  const result = await issueAuthorizationRedirect(user, authorizeRequest);
+  return result.redirect_to;
 };
 
 export const buildWebLoginStartResult = () => {

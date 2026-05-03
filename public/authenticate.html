@@ -17,9 +17,7 @@
 
           <div class="stack centered" style="gap: 12px">
             <h1 class="form-title">Sign in</h1>
-            <p class="description lead" id="requestInfo">
-              Continue to send an authorization code back to the requesting app.
-            </p>
+            <p class="description lead" id="requestInfo"></p>
           </div>
 
           <form class="stack" id="loginForm" novalidate>
@@ -90,7 +88,9 @@
         const requestInfo = document.getElementById("requestInfo");
 
         signupLink.href = `/signup.html?${params.toString()}`;
-        requestInfo.textContent = `${params.get("client_name") || params.get("client_id") || "This app"} wants to continue with ${params.get("scope") || "openid profile email"}.`;
+        const appName =
+          params.get("client_name") || params.get("client_id") || "This app";
+        requestInfo.textContent = `Sign in to continue to ${appName}.`;
 
         const form = document.getElementById("loginForm");
         wireAsyncForm({
@@ -107,7 +107,8 @@
               state: params.get("state") || "",
               nonce: params.get("nonce") || "",
               code_challenge: params.get("code_challenge") || "",
-              code_challenge_method: params.get("code_challenge_method") || "S256",
+              code_challenge_method:
+                params.get("code_challenge_method") || "S256",
             };
 
             const data = await apiRequest("/auth/sign-in", {

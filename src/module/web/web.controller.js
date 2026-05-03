@@ -5,6 +5,7 @@ import { notifyBackchannelLogout } from "../oauth/backchannel-logout.service.js"
 import { getClientByClientId } from "../client/client.service.js";
 import {
   buildExternalLoginRedirect,
+  buildExternalSessionRedirect,
   buildFlowCookieHeader,
   buildWebAuthPageStartResult,
   buildWebLoginStartResult,
@@ -15,6 +16,7 @@ import {
   getWebOwnedApps,
   getWebMe,
   getWebSessionFromRequest,
+  hasWebSessionCookie,
   logoutClientForUser,
   refreshWebSessionTokens,
 } from "./web.service.js";
@@ -24,6 +26,15 @@ const publicDir = path.resolve(__dirname, "../../../public");
 
 export const startExternalLogin = async (req, res, next) => {
   try {
+    if (hasWebSessionCookie(req)) {
+      try {
+        const callbackUrl = await buildExternalSessionRedirect({ query: req.query, req });
+        return res.redirect(302, callbackUrl);
+      } catch {
+        // Stale IdP session; continue with the interactive login page.
+      }
+    }
+
     const loginUrl = await buildExternalLoginRedirect(req.query);
     return res.redirect(302, loginUrl);
   } catch (error) {

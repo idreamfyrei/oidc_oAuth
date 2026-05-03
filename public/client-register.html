@@ -26,42 +26,44 @@
           </div>
 
           <form class="stack" id="registerForm" novalidate>
-            <div class="splitter" style="margin-bottom: 4px">YOUR ACCOUNT</div>
+            <div class="stack" id="accountFields" style="gap: 18px">
+              <div class="splitter" style="margin-bottom: 4px">YOUR ACCOUNT</div>
 
-            <div class="field">
-              <label for="fullName">Full name</label>
-              <input
-                class="input"
-                id="fullName"
-                placeholder="Jane Doe"
-                autocomplete="name"
-                required
-              />
-            </div>
+              <div class="field">
+                <label for="fullName">Full name</label>
+                <input
+                  class="input"
+                  id="fullName"
+                  placeholder="Jane Doe"
+                  autocomplete="name"
+                  required
+                />
+              </div>
 
-            <div class="field">
-              <label for="email">Email address</label>
-              <input
-                class="input"
-                id="email"
-                type="email"
-                placeholder="you@company.com"
-                autocomplete="email"
-                required
-              />
-            </div>
+              <div class="field">
+                <label for="email">Email address</label>
+                <input
+                  class="input"
+                  id="email"
+                  type="email"
+                  placeholder="you@company.com"
+                  autocomplete="email"
+                  required
+                />
+              </div>
 
-            <div class="field">
-              <label for="password">Password</label>
-              <input
-                class="input"
-                id="password"
-                type="password"
-                minlength="8"
-                placeholder="Minimum 8 characters"
-                autocomplete="new-password"
-                required
-              />
+              <div class="field">
+                <label for="password">Password</label>
+                <input
+                  class="input"
+                  id="password"
+                  type="password"
+                  minlength="8"
+                  placeholder="Minimum 8 characters"
+                  autocomplete="new-password"
+                  required
+                />
+              </div>
             </div>
 
             <div class="splitter" style="margin-bottom: 4px">YOUR APP</div>
@@ -137,9 +139,9 @@
 
           <div class="error" id="error"></div>
 
-          <div class="splitter">OR</div>
+          <div class="splitter" id="signinDivider">OR</div>
 
-          <p class="description centered">
+          <p class="description centered" id="signinPrompt">
             Already have an account?
             <a href="/login"><strong>Sign in</strong></a>
           </p>
@@ -235,10 +237,15 @@
     </main>
 
     <script type="module">
-      import { apiRequest } from "/lib/api.js";
+      import { apiGet, apiRequest } from "/lib/api.js";
 
       const form = document.getElementById("registerForm");
       const error = document.getElementById("error");
+      const accountFields = document.getElementById("accountFields");
+      const registerIntro = document.getElementById("registerIntro");
+      const signinDivider = document.getElementById("signinDivider");
+      const signinPrompt = document.getElementById("signinPrompt");
+      let currentUser = null;
 
       const splitFullName = (value) => {
         const cleaned = value.trim().replace(/\s+/g, " ");
@@ -262,24 +269,9 @@
         }
       });
 
-      form.addEventListener("submit", async (event) => {
-        event.preventDefault();
-        error.style.display = "none";
-        error.textContent = "";
-
-        const { firstName, lastName } = splitFullName(document.getElementById("fullName").value);
-        if (!firstName) {
-          error.textContent = "Please enter your full name.";
-          error.style.display = "block";
-          return;
-        }
-
+      const buildClientPayload = () => {
         const redirectUri = document.getElementById("redirectUri").value.trim();
-        const payload = {
-          firstName,
-          lastName,
-          email: document.getElementById("email").value.trim(),
-          password: document.getElementById("password").value,
+        return {
           clientName: document.getElementById("clientName").value.trim(),
           websiteUrl: document.getElementById("websiteUrl").value.trim() || undefined,
           redirectUris: [redirectUri],
@@ -288,9 +280,57 @@
           tokenEndpointAuthMethod: document.getElementById("tokenEndpointAuthMethod").value,
           clientId: document.getElementById("clientId").value.trim() || undefined,
         };
+      };
+
+      const setLoggedInMode = (user) => {
+        currentUser = user;
+        accountFields.classList.add("hidden");
+        signinDivider.classList.add("hidden");
+        signinPrompt.classList.add("hidden");
+        for (const input of accountFields.querySelectorAll("input")) {
+          input.required = false;
+          input.disabled = true;
+        }
+        registerIntro.querySelector("p").textContent =
+          `Register another app under ${user.email || "your signed-in account"}.`;
+      };
+
+      const loadSession = async () => {
+        try {
+          const response = await apiGet("/me");
+          if (response.data) {
+            setLoggedInMode(response.data);
+          }
+        } catch {
+          currentUser = null;
+        }
+      };
+
+      form.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        error.style.display = "none";
+        error.textContent = "";
+
+        const payload = buildClientPayload();
+        let endpoint = "/clients/register";
+
+        if (!currentUser) {
+          const { firstName, lastName } = splitFullName(document.getElementById("fullName").value);
+          if (!firstName) {
+            error.textContent = "Please enter your full name.";
+            error.style.display = "block";
+            return;
+          }
+
+          endpoint = "/company/register";
+          payload.firstName = firstName;
+          payload.lastName = lastName;
+          payload.email = document.getElementById("email").value.trim();
+          payload.password = document.getElementById("password").value;
+        }
 
         try {
-          const result = await apiRequest("/company/register", {
+          const result = await apiRequest(endpoint, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(payload),
@@ -298,7 +338,8 @@
 
           const { user, client, links } = result.data;
 
-          document.getElementById("resultEmail").textContent = user.email;
+          document.getElementById("resultEmail").textContent =
+            user?.email || currentUser?.email || "Signed-in account";
           document.getElementById("resultName").textContent = client.client_name;
           document.getElementById("resultClientId").textContent = client.client_id;
           document.getElementById("resultAuthMethod").textContent = client.token_endpoint_auth_method;
@@ -306,7 +347,7 @@
           document.getElementById("resultTokenEndpoint").textContent = links.token_endpoint;
           document.getElementById("resultClientSecret").textContent = client.client_secret ?? "";
 
-          document.getElementById("registerIntro").classList.add("hidden");
+          registerIntro.classList.add("hidden");
           form.classList.add("hidden");
           document.getElementById("resultCard").classList.remove("hidden");
           window.scrollTo({ top: 0, behavior: "smooth" });
@@ -315,6 +356,8 @@
           error.style.display = "block";
         }
       });
+
+      loadSession();
     </script>
   </body>
 </html>

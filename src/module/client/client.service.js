@@ -5,7 +5,7 @@ import { db } from "../../common/db/index.js";
 import { oauthClientsTable } from "../../common/db/db.js";
 import config from "../../common/config/connection.js";
 import ApiError from "../../common/utils/api-error.js";
-import { findUserByEmail, createUser } from "../account/account.repository.js";
+import { findUserByEmail, createUser, findUserById } from "../account/account.repository.js";
 
 const defaultClients = [
   {
@@ -139,6 +139,51 @@ export const registerClientApplication = async (payload, options = {}) => {
   };
 };
 
+const buildAuthorizeUrlTemplate = (client) => {
+  const defaultRedirectUri = client.redirect_uris[0];
+  const authorizeUrl = new URL("/authorize", config.issuer);
+  authorizeUrl.searchParams.set("client_id", client.client_id);
+  authorizeUrl.searchParams.set("redirect_uri", defaultRedirectUri);
+  authorizeUrl.searchParams.set("response_type", "code");
+  authorizeUrl.searchParams.set("scope", "openid profile email");
+  authorizeUrl.searchParams.set("state", "{state}");
+  authorizeUrl.searchParams.set("nonce", "{nonce}");
+  authorizeUrl.searchParams.set("code_challenge", "{code_challenge}");
+  authorizeUrl.searchParams.set("code_challenge_method", "S256");
+  return authorizeUrl.toString();
+};
+
+export const buildClientRegistrationResult = ({ user, client }) => ({
+  user: user
+    ? {
+        id: user.id,
+        email: user.email,
+        name: [user.firstName, user.lastName].filter(Boolean).join(" ").trim(),
+      }
+    : null,
+  client: {
+    ...client,
+    client_secret: client.client_secret,
+  },
+  links: {
+    authorize_url_template: buildAuthorizeUrlTemplate(client),
+    token_endpoint: `${config.issuer}/oauth/token`,
+    discovery_document: `${config.issuer}/.well-known/openid-configuration`,
+    jwks_uri: `${config.issuer}/.well-known/jwks.json`,
+  },
+});
+
+export const registerClientForUser = async (payload, ownerUserId) => {
+  const user = await findUserById(ownerUserId);
+
+  if (!user) {
+    throw ApiError.unauthorized("Signed-in user no longer exists.");
+  }
+
+  const client = await registerClientApplication(payload, { ownerUserId: user.id });
+  return buildClientRegistrationResult({ user, client });
+};
+
 export const registerCompany = async (payload) => {
   const existing = await findUserByEmail(payload.email);
   if (existing) {
@@ -174,32 +219,5 @@ export const registerCompany = async (payload) => {
     { ownerUserId: user.id },
   );
 
-  const defaultRedirectUri = client.redirect_uris[0];
-  const authorizeUrl = new URL("/authorize", config.issuer);
-  authorizeUrl.searchParams.set("client_id", client.client_id);
-  authorizeUrl.searchParams.set("redirect_uri", defaultRedirectUri);
-  authorizeUrl.searchParams.set("response_type", "code");
-  authorizeUrl.searchParams.set("scope", "openid profile email");
-  authorizeUrl.searchParams.set("state", "{state}");
-  authorizeUrl.searchParams.set("nonce", "{nonce}");
-  authorizeUrl.searchParams.set("code_challenge", "{code_challenge}");
-  authorizeUrl.searchParams.set("code_challenge_method", "S256");
-
-  return {
-    user: {
-      id: user.id,
-      email: user.email,
-      name: [user.firstName, user.lastName].filter(Boolean).join(" ").trim(),
-    },
-    client: {
-      ...client,
-      client_secret: client.client_secret,
-    },
-    links: {
-      authorize_url_template: authorizeUrl.toString(),
-      token_endpoint: `${config.issuer}/oauth/token`,
-      discovery_document: `${config.issuer}/.well-known/openid-configuration`,
-      jwks_uri: `${config.issuer}/.well-known/jwks.json`,
-    },
-  };
+  return buildClientRegistrationResult({ user, client });
 };

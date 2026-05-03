@@ -3,7 +3,9 @@ import { clientIdParamSchema, companyRegisterSchema, registerClientSchema } from
 import {
   getClientByClientId,
   listClients,
+  buildClientRegistrationResult,
   registerClientApplication,
+  registerClientForUser,
   registerCompany,
 } from "./client.service.js";
 import { getWebSessionFromRequest } from "../web/web.service.js";
@@ -20,8 +22,14 @@ export const registerClient = async (req, res, next) => {
       ownerUserId = null;
     }
 
-    const client = await registerClientApplication(payload, { ownerUserId });
-    return ApiResponse.created(res, "Client registered.", client);
+    const result = ownerUserId
+      ? await registerClientForUser(payload, ownerUserId)
+      : buildClientRegistrationResult({
+          user: null,
+          client: await registerClientApplication(payload),
+        });
+
+    return ApiResponse.created(res, "Client registered.", result);
   } catch (error) {
     next(error);
   }
